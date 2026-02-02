@@ -1,3 +1,233 @@
 from django.shortcuts import render
+from .models import Users, Services, Masters, Appointments
+from django.core.paginator import Paginator
+from django.db.models import Q
+from datetime import date, datetime
 
 # Create your views here.
+def index_page(request):
+    # Получаем популярные услуги (можно добавить поле is_popular в модель)
+    popular_services = Services.objects.all()[:4]  # Временно берем первые 4
+    
+    # Получаем мастеров для отображения на главной
+    featured_masters = Masters.objects.all()[:4]  # Временно берем первых 4
+    
+    # Статистика (пример)
+    stats = {
+        'masters_count': Masters.objects.count(),
+        'services_count': Services.objects.count(),
+        'happy_clients': Users.objects.filter(role='client').count()  # Пример
+    }
+    
+    context = {
+        'popular_services': popular_services,
+        'featured_masters': featured_masters,
+        'stats': stats,
+    }
+    
+    return render(request, 'index.html', context)
+
+def services_page(request):
+    category_filter = request.GET.get('category', '')
+    search_query = request.GET.get('search', '')
+    
+    # Получаем все услуги
+    services_list = Services.objects.all()
+    
+    # Применяем фильтры
+    if category_filter:
+        services_list = services_list.filter(category=category_filter)
+    
+    if search_query:
+        services_list = services_list.filter(
+            Q(name__icontains=search_query) |
+            Q(description__icontains=search_query)
+        )
+    
+    # Пагинация
+    paginator = Paginator(services_list, 9)  # 9 услуг на странице
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    # Получаем уникальные категории для фильтра
+    categories = Services.objects.values_list('category', 'category').distinct()
+    
+    context = {
+        'page_obj': page_obj,
+        'categories': categories,
+        'selected_category': category_filter,
+        'search_query': search_query,
+    }
+    
+    return render(request, 'services.html', context)
+
+def masters_page(request):
+    specialization_filter = request.GET.get('specialization', '')
+    search_query = request.GET.get('search', '')
+    
+    # Получаем всех мастеров
+    masters_list = Masters.objects.select_related('user').all()
+    
+    # Применяем фильтры
+    if specialization_filter:
+        masters_list = masters_list.filter(specialization__icontains=specialization_filter)
+    
+    if search_query:
+        masters_list = masters_list.filter(
+            Q(user__first_name__icontains=search_query) |
+            Q(user__last_name__icontains=search_query) |
+            Q(description__icontains=search_query)
+        )
+    
+    # Пагинация
+    paginator = Paginator(masters_list, 12)  # 12 мастеров на странице
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    # Получаем уникальные специализации
+    specializations = Masters.objects.values_list('specialization', flat=True).distinct()
+    
+    context = {
+        'page_obj': page_obj,
+        'specializations': specializations,
+        'selected_specialization': specialization_filter,
+        'search_query': search_query,
+    }
+    
+    return render(request, 'masters.html', context)
+
+def promotions_page(request):
+    promotions = [
+        {
+            'title': 'Скидка 20% на первое посещение',
+            'description': 'Для новых клиентов действует скидка 20% на любую услугу при первом посещении',
+            'valid_until': '31.12.2024',
+        },
+        {
+            'title': 'Комплекс услуг со скидкой 15%',
+            'description': 'При заказе комплекса из 3 и более услуг действует скидка 15%',
+            'valid_until': '30.11.2024',
+        },
+        {
+            'title': 'Подарочный сертификат',
+            'description': 'При покупке подарочного сертификата от 5000 рублей - дополнительная услуга в подарок',
+            'valid_until': '01.01.2025',
+        },
+    ]
+    
+    context = {
+        'promotions': promotions,
+    }
+    
+    return render(request, 'promotions.html', context)
+
+def booking_page(request):
+    error = None
+    success_message = None
+    
+    if request.method == 'POST':
+        # Получаем данные из формы
+        client_name = request.POST.get('client_name')
+        client_phone = request.POST.get('client_phone')
+        client_email = request.POST.get('client_email')
+        service_id = request.POST.get('service')
+        master_id = request.POST.get('master')
+        appointment_date = request.POST.get('date')
+        appointment_time = request.POST.get('time')
+        notes = request.POST.get('notes', '')
+        
+        try:
+            # Получаем объекты
+            service = Services.objects.get(id=service_id)
+            master = Masters.objects.get(id=master_id)
+            
+            # Проверяем доступность времени
+            is_time_available = not Appointments.objects.filter(
+                master=master,
+                date=appointment_date,
+                time=appointment_time,
+                status__in=['confirmed', 'pending']
+            ).exists()
+            
+            if not is_time_available:
+                error = "Выбранное время уже занято. Пожалуйста, выберите другое время."
+            else:
+                # Создаем пользователя (или находим существующего)
+                user, created = Users.objects.get_or_create(
+                    phone=client_phone,
+                    defaults={
+                        'first_name': client_name.split()[0] if client_name else 'Клиент',
+                        'last_name': ' '.join(client_name.split()[1:]) if client_name and len(client_name.split()) > 1 else '',
+                        'email': client_email,
+                        'password': 'default_password',  # В реальном проекте нужно генерировать
+                        'role': 'client',
+                    }
+                )
+                
+                # Создаем запись
+                appointment = Appointments.objects.create(
+                    client=user,
+                    master=master,
+                    service=service,
+                    date=appointment_date,
+                    time=appointment_time,
+                    notes=notes,
+                    status='pending'
+                )
+                
+                success_message = f"Запись успешно создана! Номер записи: {appointment.id}. Мы свяжемся с вами для подтверждения."
+                
+        except Services.DoesNotExist:
+            error = "Выбранная услуга не найдена."
+        except Masters.DoesNotExist:
+            error = "Выбранный мастер не найден."
+        except Exception as e:
+            error = f"Произошла ошибка: {str(e)}"
+    
+    # Получаем данные для формы
+    services = Services.objects.all()
+    masters = Masters.objects.all()
+    
+    # Если передан мастер или услуга в GET-параметрах
+    selected_master_id = request.GET.get('master_id')
+    selected_service_id = request.GET.get('service_id')
+    
+    selected_master = None
+    selected_service = None
+    
+    if selected_master_id:
+        try:
+            selected_master = Masters.objects.get(id=selected_master_id)
+        except Masters.DoesNotExist:
+            pass
+    
+    if selected_service_id:
+        try:
+            selected_service = Services.objects.get(id=selected_service_id)
+        except Services.DoesNotExist:
+            pass
+    
+    # Получаем занятое время для календаря (если выбраны мастер и дата)
+    busy_times = []
+    master_id_for_calendar = request.GET.get('master_for_calendar')
+    date_for_calendar = request.GET.get('date_for_calendar')
+    
+    if master_id_for_calendar and date_for_calendar:
+        busy_times = Appointments.objects.filter(
+            master_id=master_id_for_calendar,
+            date=date_for_calendar,
+            status__in=['confirmed', 'pending']
+        ).values_list('time', flat=True)
+    
+    context = {
+        'services': services,
+        'masters': masters,
+        'selected_master': selected_master,
+        'selected_service': selected_service,
+        'error': error,
+        'success_message': success_message,
+        'busy_times': busy_times,
+        'today': date.today().isoformat(),
+    }
+    
+    return render(request, 'booking.html', context)
