@@ -1,8 +1,10 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect, get_object_or_404
 from .models import Users, Services, Masters, Appointments
 from django.core.paginator import Paginator
 from django.db.models import Q
 from datetime import date, datetime
+from django.contrib import messages
+from django.contrib.auth.hashers import make_password, check_password
 
 # Create your views here.
 def index_page(request):
@@ -61,6 +63,18 @@ def services_page(request):
     
     return render(request, 'services.html', context)
 
+def service_detail_page(request, service_id):
+    service = get_object_or_404(Services, id=service_id)
+    masters = Masters.objects.all()
+    
+    context = {
+        'service': service,
+        'masters': masters,
+        'user': request.session.get('user')
+    }
+    
+    return render(request, 'service_detail.html', context)
+
 def masters_page(request):
     specialization_filter = request.GET.get('specialization', '')
     search_query = request.GET.get('search', '')
@@ -95,6 +109,28 @@ def masters_page(request):
     }
     
     return render(request, 'masters.html', context)
+
+# Детальная страница мастера
+def master_detail_page(request, master_id):
+    master = get_object_or_404(Masters, id=master_id)
+    
+    # Получаем услуги, которые предоставляет мастер
+    services = Services.objects.all()[:5]
+    
+    upcoming_appointments = Appointments.objects.filter(
+        master=master,
+        date__gte=date.today(),
+        status='confirmed'
+    ).order_by('date', 'time')[:5]
+    
+    context = {
+        'master': master,
+        'services': services,
+        'upcoming_appointments': upcoming_appointments,
+        'user': request.session.get('user')
+    }
+    
+    return render(request, 'master_detail.html', context)
 
 def promotions_page(request):
     promotions = [
@@ -231,3 +267,193 @@ def booking_page(request):
     }
     
     return render(request, 'booking.html', context)
+
+# РЕГИСТРАЦИЯ И АВТОРИЗАЦИЯ
+
+def register_page(request):
+    """Страница регистрации"""
+    if request.method == 'POST':
+        first_name = request.POST.get('first_name', '').strip()
+        last_name = request.POST.get('last_name', '').strip()
+        phone = request.POST.get('phone', '').strip()
+        email = request.POST.get('email', '').strip()
+        password = request.POST.get('password', '')
+        password2 = request.POST.get('password2', '')
+        
+        # Валидация данных
+        if not all([first_name, last_name, phone, email, password, password2]):
+            messages.error(request, 'Все поля обязательны для заполнения.')
+            return render(request, 'register.html')
+        
+        if password != password2:
+            messages.error(request, 'Пароли не совпадают.')
+            return render(request, 'register.html')
+        
+        if len(password) < 6:
+            messages.error(request, 'Пароль должен содержать минимум 6 символов.')
+            return render(request, 'register.html')
+        
+        # Проверка уникальности телефона и email
+        if Users.objects.filter(phone=phone).exists():
+            messages.error(request, 'Пользователь с таким номером телефона уже зарегистрирован.')
+            return render(request, 'register.html')
+        
+        if Users.objects.filter(email=email).exists():
+            messages.error(request, 'Пользователь с таким email уже зарегистрирован.')
+            return render(request, 'register.html')
+        
+        try:
+            # Хэшируем пароль
+            hashed_password = make_password(password)
+            
+            # Создаем пользователя
+            user = Users.objects.create(
+                first_name=first_name,
+                last_name=last_name,
+                phone=phone,
+                email=email,
+                password=hashed_password,
+                role='client'
+            )
+            
+            # Автоматически авторизуем пользователя
+            request.session['user_id'] = user.id
+            request.session['user'] = {
+                'id': user.id,
+                'first_name': user.first_name,
+                'last_name': user.last_name,
+                'phone': user.phone,
+                'email': user.email,
+                'role': user.role
+            }
+            
+            messages.success(request, f'Регистрация прошла успешно! Добро пожаловать, {first_name}!')
+            return redirect('index')
+            
+        except Exception as e:
+            messages.error(request, f'Ошибка при регистрации: {str(e)}')
+    
+    return render(request, 'register.html')
+
+def login_page(request):
+    """Страница входа"""
+    if request.method == 'POST':
+        phone = request.POST.get('phone', '').strip()
+        password = request.POST.get('password', '')
+        
+        if not phone or not password:
+            messages.error(request, 'Введите телефон и пароль.')
+            return render(request, 'login.html')
+        
+        try:
+            # Ищем пользователя
+            user = Users.objects.get(phone=phone)
+            
+            # Проверяем пароль
+            if check_password(password, user.password):
+                # Сохраняем пользователя в сессии
+                request.session['user_id'] = user.id
+                request.session['user'] = {
+                    'id': user.id,
+                    'first_name': user.first_name,
+                    'last_name': user.last_name,
+                    'phone': user.phone,
+                    'email': user.email,
+                    'role': user.role
+                }
+                
+                messages.success(request, f'Добро пожаловать, {user.first_name}!')
+                return redirect('index')
+            else:
+                messages.error(request, 'Неверный пароль.')
+                
+        except Users.DoesNotExist:
+            messages.error(request, 'Пользователь с таким телефоном не найден.')
+    
+    return render(request, 'login.html')
+
+def logout_page(request):
+    """Выход из системы"""
+    if 'user_id' in request.session:
+        del request.session['user_id']
+    if 'user' in request.session:
+        del request.session['user']
+    
+    messages.success(request, 'Вы успешно вышли из системы.')
+    return redirect('index')
+
+# ЛИЧНЫЙ КАБИНЕТ
+
+def profile_page(request):
+    """Личный кабинет пользователя"""
+    # Проверяем авторизацию
+    user_id = request.session.get('user_id')
+    if not user_id:
+        messages.warning(request, 'Для доступа к личному кабинету необходимо авторизоваться.')
+        return redirect('login')
+    
+    try:
+        user = Users.objects.get(id=user_id)
+        
+        # Получаем все записи пользователя
+        appointments = Appointments.objects.filter(client=user).order_by('-date', '-time')
+        
+        # Разделяем записи на будущие и прошедшие
+        today = date.today()
+        now = datetime.now().time()
+        
+        future_appointments = []
+        past_appointments = []
+        
+        for appointment in appointments:
+            if appointment.date > today or (appointment.date == today and appointment.time > now):
+                future_appointments.append(appointment)
+            else:
+                past_appointments.append(appointment)
+        
+        context = {
+            'user': request.session.get('user'),
+            'future_appointments': future_appointments,
+            'past_appointments': past_appointments,
+        }
+        
+        return render(request, 'profile.html', context)
+        
+    except Users.DoesNotExist:
+        # Если пользователь не найден, очищаем сессию
+        if 'user_id' in request.session:
+            del request.session['user_id']
+        if 'user' in request.session:
+            del request.session['user']
+        
+        messages.error(request, 'Пользователь не найден.')
+        return redirect('login')
+
+def cancel_appointment(request, appointment_id):
+    """Отмена записи"""
+    user_id = request.session.get('user_id')
+    if not user_id:
+        messages.warning(request, 'Для отмены записи необходимо авторизоваться.')
+        return redirect('login')
+    
+    try:
+        appointment = Appointments.objects.get(id=appointment_id, client_id=user_id)
+        
+        # Можно отменять только будущие записи
+        today = date.today()
+        now = datetime.now().time()
+        
+        if appointment.date < today or (appointment.date == today and appointment.time < now):
+            messages.error(request, 'Нельзя отменить прошедшую запись.')
+        elif appointment.status in ['cancelled', 'completed', 'no_show']:
+            messages.error(request, 'Эта запись уже имеет финальный статус.')
+        else:
+            appointment.status = 'cancelled'
+            appointment.save()
+            messages.success(request, 'Запись успешно отменена.')
+        
+        return redirect('profile')
+        
+    except Appointments.DoesNotExist:
+        messages.error(request, 'Запись не найдена или у вас нет прав для ее отмены.')
+        return redirect('profile')
