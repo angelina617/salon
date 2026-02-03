@@ -59,6 +59,7 @@ class Appointments(models.Model):
     date = models.DateField(verbose_name='Дата')
     time = models.TimeField(verbose_name='Время')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending', verbose_name='Статус')
+    notes = models.TextField(verbose_name='Примечания', blank=True)
 
     def __str__(self):
         return f"{self.client} - {self.service} ({self.date} {self.time})"

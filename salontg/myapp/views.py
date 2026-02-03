@@ -5,6 +5,7 @@ from django.db.models import Q
 from datetime import date, datetime
 from django.contrib import messages
 from django.contrib.auth.hashers import make_password, check_password
+from .forms import RegisterForm, LoginForm, BookingForm
 
 # Create your views here.
 def index_page(request):
@@ -271,50 +272,20 @@ def booking_page(request):
 # РЕГИСТРАЦИЯ И АВТОРИЗАЦИЯ
 
 def register_page(request):
-    """Страница регистрации"""
+    """Страница регистрации с использованием формы"""
     if request.method == 'POST':
-        first_name = request.POST.get('first_name', '').strip()
-        last_name = request.POST.get('last_name', '').strip()
-        phone = request.POST.get('phone', '').strip()
-        email = request.POST.get('email', '').strip()
-        password = request.POST.get('password', '')
-        password2 = request.POST.get('password2', '')
+        # Создаем форму с данными из POST-запроса
+        form = RegisterForm(request.POST)
         
-        # Валидация данных
-        if not all([first_name, last_name, phone, email, password, password2]):
-            messages.error(request, 'Все поля обязательны для заполнения.')
-            return render(request, 'register.html')
-        
-        if password != password2:
-            messages.error(request, 'Пароли не совпадают.')
-            return render(request, 'register.html')
-        
-        if len(password) < 6:
-            messages.error(request, 'Пароль должен содержать минимум 6 символов.')
-            return render(request, 'register.html')
-        
-        # Проверка уникальности телефона и email
-        if Users.objects.filter(phone=phone).exists():
-            messages.error(request, 'Пользователь с таким номером телефона уже зарегистрирован.')
-            return render(request, 'register.html')
-        
-        if Users.objects.filter(email=email).exists():
-            messages.error(request, 'Пользователь с таким email уже зарегистрирован.')
-            return render(request, 'register.html')
-        
-        try:
-            # Хэшируем пароль
-            hashed_password = make_password(password)
+        if form.is_valid():
+            # form.cleaned_data содержит валидированные данные
+            # commit=False означает: создай объект, но не сохраняй в базу пока
+            user = form.save(commit=False)
             
-            # Создаем пользователя
-            user = Users.objects.create(
-                first_name=first_name,
-                last_name=last_name,
-                phone=phone,
-                email=email,
-                password=hashed_password,
-                role='client'
-            )
+            # Хэшируем пароль (форма уже проверила, что пароли совпадают)
+            user.password = make_password(form.cleaned_data['password'])
+            user.role = 'client'
+            user.save()  # Теперь сохраняем в базу
             
             # Автоматически авторизуем пользователя
             request.session['user_id'] = user.id
@@ -327,13 +298,18 @@ def register_page(request):
                 'role': user.role
             }
             
-            messages.success(request, f'Регистрация прошла успешно! Добро пожаловать, {first_name}!')
+            messages.success(request, f'Регистрация прошла успешно! Добро пожаловать, {user.first_name}!')
             return redirect('index')
-            
-        except Exception as e:
-            messages.error(request, f'Ошибка при регистрации: {str(e)}')
+        
+        # Если форма невалидна, Django сохранит ошибки в form.errors
+        # и мы вернем форму с ошибками пользователю
+        # НЕТ НЕОБХОДИМОСТИ ВРУЧНУЮ ВЫВОДИТЬ СООБЩЕНИЯ - форма сама покажет ошибки в шаблоне
     
-    return render(request, 'register.html')
+    else:  # GET запрос - показываем пустую форму
+        form = RegisterForm()
+    
+    # Рендерим шаблон с формой
+    return render(request, 'register.html', {'form': form})
 
 def login_page(request):
     """Страница входа"""
