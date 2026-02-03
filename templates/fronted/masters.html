@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Наши мастера - Салон крсоты TanGel</title>
+    <title>Наши мастера - Салон красоты TanGel</title>
     <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/services.css">
+    <link rel="stylesheet" href="css/masters.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
@@ -18,7 +18,7 @@
                     <span class="logo-text">TanGel</span>
                     <span class="logo-sub">Beauty Salon</span>
                 </a>
-
+                
                 <div class="nav-menu">
                     <a href="index.html" class="nav-link">Главная</a>
                     <a href="services.html" class="nav-link">Услуги</a>
@@ -26,20 +26,75 @@
                     <a href="promotions.html" class="nav-link">Акции</a>
                     <a href="booking.html" class="nav-link">Запись</a>
                 </div>
-
-                <div class="nav-contacts">
-                    <a href="tel:+79991234567" class="phone">
-                        <i class="fas fa-phone"></i>
-                        +7 (999) 123-45-67
+                
+                <div class="nav-actions">
+                    <a href="login.html" class="nav-link">
+                        <i class="fas fa-user"></i> Войти
                     </a>
                     <a href="booking.html" class="btn btn-primary">Записаться</a>
                 </div>
-
+                
                 <button class="menu-toggle">
                     <i class="fas fa-bars"></i>
                 </button>
             </div>
         </nav>
     </header>
-</body>
-</html>
+
+ <section class="masters-hero">
+        <div class="container">
+            <h1>Наши мастера</h1>
+            <p>Профессионалы с любовью к своему делу и вниманием к каждому клиенту</p>
+        </div>
+</section>
+
+<section class="specialization-filter">
+        <div class="container">
+            <div class="filter-tabs">
+                <button class="filter-tab active" data-filter="all">Все мастера</button>
+                <button class="filter-tab" data-filter="massage">Массажисты</button>
+                <button class="filter-tab" data-filter="cosmetology">Косметологи</button>
+                <button class="filter-tab" data-filter="hair">Стилисты</button>
+                <button class="filter-tab" data-filter="nails">Мастера маникюра</button>
+            </div>
+        </div>
+</section>
+
+<section class="masters-grid-section">
+        <div class="container">
+            <div class="masters-grid">
+                <!-- Мастер 1 -->
+                <div class="master-card" data-category="massage">
+                    <div class="master-photo">
+                        <div class="photo-placeholder">
+                            <i class="fas fa-user-circle"></i>
+                        </div>
+                        <span class="master-status available">Свободен</span>
+                    </div>
+                    <div class="master-info">
+                        <h3 class="master-name">Анна Смирнова</h3>
+                        <p class="master-specialty">Массажист</p>
+                        <div class="master-rating">
+                            <div class="stars">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                            </div>
+                            <span class="rating-value">4.8</span>
+                            <span class="reviews">(124 отзыва)</span>
+                        </div>
+                        <p class="master-experience">Опыт: 8 лет</p>
+                        <div class="master-skills">
+                            <span class="skill-tag">Тайский массаж</span>
+                            <span class="skill-tag">Лимфодренажный</span>
+                            <span class="skill-tag">Антицеллюлитный</span>
+                        </div>
+                        <div class="master-price">
+                            от 2 500 ₽ / сеанс
+                        </div>
+                        <a href="booking.html?master=anna" class="btn btn-outline">Записаться</a>
+                    </div>
+                </div>
+</section>
