@@ -1,10 +1,13 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Салон красоты TanGel</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <!-- <link rel="stylesheet" href="{% static 'images/11.jpg' %}"> -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
@@ -12,16 +15,16 @@
     <header class="header">
         <nav class="navbar">
             <div class="container">
-                <a href="index.html" class="logo">
+                <a href="{% url 'index' %}" class="logo">
                     <span class="logo-icon">✨</span>
                     <span class="logo-text">TanGel</span>
                     <span class="logo-sub">Beauty Salon</span>
                 </a>
                 
                 <div class="nav-menu">
-                    <a href="index.html" class="nav-link active">Главная</a>
+                    <a href="{% url 'index' %}" class="nav-link active">Главная</a>
                     <a href="about.html" class="nav-link">О нас</a>
-                    <a href="services.html" class="nav-link">Услуги</a>
+                    <a href="{% url 'services' %}" class="nav-link">Услуги</a>
                     <a href="masters.html" class="nav-link">Мастера</a>
                     <a href="booking.html" class="nav-link">Запись</a>
                     <a href="contacts.html" class="nav-link">Контакты</a>
