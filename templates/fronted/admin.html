@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Админ-панель - TanGel Beauty Salon</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="header admin-header">
+        <nav class="navbar">
+            <div class="container">
+                <a href="index.html" class="logo">
+                    <span class="logo-icon">✨</span>
+                    <span class="logo-text">TanGel</span>
+                    <span class="logo-sub">Админ-панель</span>
+                </a>
+                
+                <div class="nav-menu">
+                    <a href="index.html" class="nav-link">Сайт</a>
+                    <a href="#dashboard" class="nav-link active">Дашборд</a>
+                    <a href="#bookings" class="nav-link">Записи</a>
+                    <a href="#clients" class="nav-link">Клиенты</a>
+                    <a href="#masters" class="nav-link">Мастера</a>
+                    <a href="#finance" class="nav-link">Финансы</a>
+                </div>
+                
+                <div class="nav-contacts">
+                    <div class="admin-info">
+                        <span class="admin-name">Администратор</span>
+                        <div class="admin-avatar">
+                            <i class="fas fa-user-shield"></i>
+                        </div>
+                    </div>
+                    <a href="client.html" class="btn btn-secondary">Кабинет клиента</a>
+                </div>
+                
+                <button class="menu-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Панель администратора -->
+    <section class="admin-dashboard">
+        <div class="container">
+            <div class="dashboard-header">
+                <h1>Панель управления салоном</h1>
+                <div class="dashboard-stats">
+                    <div class="stat-badge">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>12 записей сегодня</span>
+                    </div>
+                    <div class="stat-badge">
+                        <i class="fas fa-users"></i>
+                        <span>8 клиентов в салоне</span>
+                    </div>
+                    <div class="stat-badge">
+                        <i class="fas fa-money-bill-wave"></i>
+                        <span>42 500 ₽ выручка</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="admin-grid">
+                <aside class="admin-sidebar">
+                    <div class="sidebar-section">
+                        <h3>Управление</h3>
+                        <nav class="admin-menu">
+                            <a href="#dashboard" class="menu-item active">
+                                <i class="fas fa-tachometer-alt"></i>
+                                <span>Дашборд</span>
+                            </a>
+                            <a href="#bookings" class="menu-item">
+                                <i class="fas fa-calendar-check"></i>
+                                <span>Записи</span>
+                                <span class="menu-badge">24</span>
+                            </a>
+                            <a href="#clients" class="menu-item">
+                                <i class="fas fa-users"></i>
+                                <span>Клиенты</span>
+                                <span class="menu-badge">156</span>
+                            </a>
+                            <a href="#masters" class="menu-item">
+                                <i class="fas fa-user-tie"></i>
+                                <span>Мастера</span>
+                                <span class="menu-badge">6</span>
+                            </a>
+                            <a href="#schedule" class="menu-item">
+                                <i class="fas fa-clock"></i>
+                                <span>Расписание</span>
+                            </a>
+                        </nav>
+                    </div>
+                    
+                    <div class="sidebar-section">
+                        <h3>Финансы</h3>
+                        <nav class="admin-menu">
+                            <a href="#finance" class="menu-item">
+                                <i class="fas fa-chart-line"></i>
+                                <span>Аналитика</span>
+                            </a>
+                            <a href="#payments" class="menu-item">
+                                <i class="fas fa-credit-card"></i>
+                                <span>Платежи</span>
+                            </a>
+                            <a href="#reports" class="menu-item">
+                                <i class="fas fa-file-invoice"></i>
+                                <span>Отчеты</span>
+                            </a>
+                        </nav>
+                    </div>
+                    
+                    <div class="sidebar-section">
+                        <h3>Настройки</h3>
+                        <nav class="admin-menu">
+                            <a href="#services" class="menu-item">
+                                <i class="fas fa-spa"></i>
+                                <span>Услуги</span>
+                            </a>
+                            <a href="#promotions" class="menu-item">
+                                <i class="fas fa-percentage"></i>
+                                <span>Акции</span>
+                            </a>
+                            <a href="#settings" class="menu-item">
+                                <i class="fas fa-cog"></i>
+                                <span>Настройки салона</span>
+                            </a>
+                        </nav>
+                    </div>
+                </aside>
+                
+                <main class="admin-content">
+                    <!-- Дашборд -->
+                    <section id="dashboard" class="content-section active">
+                        <div class="section-header">
+                            <h2>Общая статистика</h2>
+                            <div class="date-selector">
+                                <select>
+                                    <option>Сегодня</option>
+                                    <option selected>Эта неделя</option>
+                                    <option>Этот месяц</option>
+                                    <option>Этот год</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="stats-grid">
+                            <div class="stat-card primary">
+                                <div class="stat-icon">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <div class="stat-number">156</div>
+                                    <div class="stat-label">Клиентов всего</div>
+                                    <div class="stat-change positive">+12%</div>
+                                </div>
+                            </div>
+                            
+                            <div class="stat-card success">
+                                <div class="stat-icon">
+                                    <i class="fas fa-calendar-check"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <div class="stat-number">42</div>
+                                    <div class="stat-label">Записей на неделе</div>
+                                    <div class="stat-change positive">+8%</div>
+                                </div>
+                            </div>
+                            
+                            <div class="stat-card warning">
+                                <div class="stat-icon">
+                                    <i class="fas fa-money-bill-wave"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <div class="stat-number">245 800 ₽</div>
+                                    <div class="stat-label">Выручка за месяц</div>
+                                    <div class="stat-change positive">+15%</div>
+                                </div>
+                            </div>
+                            
+                            <div class="stat-card info">
+                                <div class="stat-icon">
+                                    <i class="fas fa-star"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <div class="stat-number">4.8</div>
+                                    <div class="stat-label">Средний рейтинг</div>
+                                    <div class="stat-change positive">+0.2</div>
+                                </div>
+                            </div>
+                        </div>
+                            
+                            <div class="chart-card">
+                                <h3>Популярные услуги</h3>
+                                <div class="services-list">
+                                    <div class="service-item">
+                                        <span class="service-name">Маникюр</span>
+                                        <div class="service-bar">
+                                            <div class="bar-fill" style="width: 85%;"></div>
+                                        </div>
+                                        <span class="service-count">42</span>
+                                    </div>
+                                    <div class="service-item">
+                                        <span class="service-name">Стрижка</span>
+                                        <div class="service-bar">
+                                            <div class="bar-fill" style="width: 70%;"></div>
+                                        </div>
+                                        <span class="service-count">35</span>
+                                    </div>
+                                    <div class="service-item">
+                                        <span class="service-name">Массаж</span>
+                                        <div class="service-bar">
+                                            <div class="bar-fill" style="width: 65%;"></div>
+                                        </div>
+                                        <span class="service-count">32</span>
+                                    </div>
+                                    <div class="service-item">
+                                        <span class="service-name">Косметология</span>
+                                        <div class="service-bar">
+                                            <div class="bar-fill" style="width: 50%;"></div>
+                                        </div>
+                                        <span class="service-count">25</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    
+                    <section id="bookings" class="content-section">
+                        <div class="section-header">
+                            <h2>Управление записями</h2>
+                            <div class="section-actions">
+                                <button class="btn btn-primary">
+                                    <i class="fas fa-plus"></i>
+                                    Добавить запись
+                                </button>
+                                <button class="btn btn-secondary">
+                                    <i class="fas fa-download"></i>
+                                    Экспорт
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="bookings-filters">
+                            <div class="filter-group">
+                                <label>Дата:</label>
+                                <input type="date" value="2024-12-15">
+                            </div>
+                            <div class="filter-group">
+                                <label>Статус:</label>
+                                <select>
+                                    <option>Все</option>
+                                    <option selected>Ожидают</option>
+                                    <option>Подтверждены</option>
+                                    <option>Выполнены</option>
+                                    <option>Отменены</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label>Мастер:</label>
+                                <select>
+                                    <option>Все мастера</option>
+                                    <option>Анна</option>
+                                    <option>Елена</option>
+                                    <option>Мария</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="bookings-table">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Время</th>
+                                        <th>Клиент</th>
+                                        <th>Услуга</th>
+                                        <th>Мастер</th>
+                                        <th>Стоимость</th>
+                                        <th>Статус</th>
+                                        <th>Действия</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>14:00</td>
+                                        <td>Мария Иванова</td>
+                                        <td>Стрижка и укладка</td>
+                                        <td>Мария</td>
+                                        <td>1 500 ₽</td>
+                                        <td><span class="status confirmed">Подтверждена</span></td>
+                                        <td>
+                                            <button class="btn-icon" title="Редактировать">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn-icon" title="Отменить">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>15:30</td>
+                                        <td>Анна Петрова</td>
+                                        <td>Маникюр</td>
+                                        <td>Ольга</td>
+                                        <td>1 200 ₽</td>
+                                        <td><span class="status pending">Ожидает</span></td>
+                                        <td>
+                                            <button class="btn-icon" title="Подтвердить">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                            <button class="btn-icon" title="Редактировать">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>16:00</td>
+                                        <td>Елена Сидорова</td>
+                                        <td>Массаж</td>
+                                        <td>Анна</td>
+                                        <td>2 500 ₽</td>
+                                        <td><span class="status completed">Выполнена</span></td>
+                                        <td>
+                                            <button class="btn-icon" title="Отметить оплату">
+                                                <i class="fas fa-credit-card"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+                    
+                    <!-- Клиенты -->
+                    <section id="clients" class="content-section">
+                        <div class="section-header">
+                            <h2>База клиентов</h2>
+                            <div class="section-actions">
+                                <button class="btn btn-primary">
+                                    <i class="fas fa-user-plus"></i>
+                                    Добавить клиента
+                                </button>
+                                <div class="search-box">
+                                    <input type="text" placeholder="Поиск клиента...">
+                                    <i class="fas fa-search"></i>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="clients-grid">
+                            <div class="client-card">
+                                <div class="client-header">
+                                    <div class="client-avatar">
+                                        <i class="fas fa-user-circle"></i>
+                                    </div>
+                                    <div class="client-info">
+                                        <h3>Мария Иванова</h3>
+                                        <p>maria@example.com</p>
+                                    </div>
+                                </div>
+                                <div class="client-stats">
+                                    <div class="client-stat">
+                                        <span class="stat-label">Посещений:</span>
+                                        <span class="stat-value">15</span>
+                                    </div>
+                                    <div class="client-stat">
+                                        <span class="stat-label">Бонусы:</span>
+                                        <span class="stat-value">3 500</span>
+                                    </div>
+                                    <div class="client-stat">
+                                        <span class="stat-label">Статус:</span>
+                                        <span class="stat-value vip">VIP</span>
+                                    </div>
+                                </div>
+                                <div class="client-actions">
+                                    <button class="btn btn-small">
+                                        <i class="fas fa-eye"></i>
+                                        Профиль
+                                    </button>
+                                    <button class="btn btn-small">
+                                        <i class="fas fa-edit"></i>
+                                        Редактировать
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="client-card">
+                                <div class="client-header">
+                                    <div class="client-avatar">
+                                        <i class="fas fa-user-circle"></i>
+                                    </div>
+                                    <div class="client-info">
+                                        <h3>Анна Петрова</h3>
+                                        <p>anna@example.com</p>
+                                    </div>
+                                </div>
+                                <div class="client-stats">
+                                    <div class="client-stat">
+                                        <span class="stat-label">Посещений:</span>
+                                        <span class="stat-value">8</span>
+                                    </div>
+                                    <div class="client-stat">
+                                        <span class="stat-label">Бонусы:</span>
+                                        <span class="stat-value">1 200</span>
+                                    </div>
+                                    <div class="client-stat">
+                                        <span class="stat-label">Статус:</span>
+                                        <span class="stat-value">Regular</span>
+                                    </div>
+                                </div>
+                                <div class="client-actions">
+                                    <button class="btn btn-small">
+                                        <i class="fas fa-eye"></i>
+                                        Профиль
+                                    </button>
+                                    <button class="btn btn-small">
+                                        <i class="fas fa-edit"></i>
+                                        Редактировать
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="client-card">
+                                <div class="client-header">
+                                    <div class="client-avatar">
+                                        <i class="fas fa-user-circle"></i>
+                                    </div>
+                                    <div class="client-info">
+                                        <h3>Елена Сидорова</h3>
+                                        <p>elena@example.com</p>
+                                    </div>
+                                </div>
+                                <div class="client-stats">
+                                    <div class="client-stat">
+                                        <span class="stat-label">Посещений:</span>
+                                        <span class="stat-value">12</span>
+                                    </div>
+                                    <div class="client-stat">
+                                        <span class="stat-label">Бонусы:</span>
+                                        <span class="stat-value">2 400</span>
+                                    </div>
+                                    <div class="client-stat">
+                                        <span class="stat-label">Статус:</span>
+                                        <span class="stat-value">Regular</span>
+                                    </div>
+                                </div>
+                                <div class="client-actions">
+                                    <button class="btn btn-small">
+                                        <i class="fas fa-eye"></i>
+                                        Профиль
+                                    </button>
+                                    <button class="btn btn-small">
+                                        <i class="fas fa-edit"></i>
+                                        Редактировать
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </main>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <div class="logo">
+                        <span class="logo-icon">✨</span>
+                        <span class="logo-text">TanGel</span>
+                    </div>
+                    <p class="footer-description">
+                        Салон красоты премиум-класса в Красноярске. Индивидуальный подход к каждому клиенту.
+                    </p>
+                </div>
+                
+                <div class="footer-col">
+                    <h3 class="footer-title">Администрация</h3>
+                    <ul class="footer-list">
+                        <li><i class="fas fa-user-shield"></i> Администратор системы</li>
+                        <li><i class="fas fa-envelope"></i> admin@tangel-beauty.ru</li>
+                        <li><i class="fas fa-clock"></i> Последний вход: 15.12.2026 10:30</li>
+                    </ul>
+                </div>
+                
+                <div class="footer-col">
+                    <h3 class="footer-title">Статистика</h3>
+                    <ul class="footer-list">
+                        <li>Клиентов: 156</li>
+                        <li>Записей сегодня: 12</li>
+                        <li>Выручка: 245 800 ₽</li>
+                        <li>Рейтинг: 4.8/5</li>
+                    </ul>
+                </div>
+                
+                <div class="footer-col">
+                    <h3 class="footer-title">Быстрые ссылки</h3>
+                    <ul class="footer-list">
+                        <li><a href="index.html">Сайт салона</a></li>
+                        <li><a href="client.html">Кабинет клиента</a></li>
+                        <li><a href="#dashboard">Статистика</a></li>
+                        <li><a href="#settings">Настройки</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2026 Салон красоты TanGel. Админ-панель v1.0</p>
+                <p>Сайт разработан для практики</p>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>
