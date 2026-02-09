@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% load static humanize %}
+
+{% block title %}Личный кабинет — {{ user.get_full_name|default:user.username }}{% endblock %}
+
+{% block content %}
+<div class="client-profile-header">
+    <h1>Личный кабинет</h1>
+    <div class="user-info">
+        <h2>{{ user.get_full_name|default:user.username }}</h2>
+        <p>{{ user.email|default:"Без email" }}</p>
+        <p>{{ visit_count|default:0 }} посещений</p>
+        <p>{{ bonus_points|default:0|intcomma }} бонусов</p>
+        <p>Статус: {{ client_status|default:"Обычный" }}</p>
+    </div>
+    <div class="quick-actions">
+        <a href="{% url 'booking' %}" class="btn">Новая запись</a>
+        <a href="{% url 'promotions' %}" class="btn-outline">Мои скидки</a>
+    </div>
+</div>
+
+<nav class="client-nav">
+    <a href="#appointments">Мои записи</a>
+    <a href="#history">История посещений</a>
+    <a href="#profile">Профиль</a>
+    <a href="#bonuses">Бонусы</a>
+    <a href="#favorites">Избранное</a>
+    <a href="#settings">Настройки</a>
+</nav>
+
+<section id="appointments" class="client-section">
+    <h2>Мои записи</h2>
+    <a href="{% url 'booking' %}" class="btn">Добавить запись</a>
+    
+    <h3>Ближайшие</h3>
+    {% for booking in upcoming_bookings %}
+    <div class="booking-card">
+        <div class="booking-date">{{ booking.datetime|date:"d E, H:i" }}</div>
+        <div class="booking-service">{{ booking.service.name }}</div>
+        <div class="booking-master">Мастер: {{ booking.master.name|default:"Любой" }}</div>
+        <div class="booking-duration">{{ booking.service.duration }} минут</div>
+        <div class="booking-price">{{ booking.service.price|floatformat:0 }} ₽</div>
+        <div class="booking-actions">
+            <a href="#">Подтвердить</a>
+            <a href="#">Отменить</a>
+            <a href="#">Перенести</a>
+        </div>
+    </div>
+    {% empty %}
+    <p>Нет предстоящих записей.</p>
+    {% endfor %}
+</section>
+
+<section id="history" class="client-section">
+    <h2>История посещений</h2>
+    <div class="stats-summary">
+        <div><strong>{{ total_visits|default:0 }}</strong> Всего посещений</div>
+        <div><strong>{{ total_bonus|default:0|intcomma }}</strong> Накоплено бонусов</div>
+        <div><strong>{{ total_spent|default:0|intcomma }} ₽</strong> Всего потрачено</div>
+        <div><strong>{{ avg_discount|default:0 }}%</strong> Средняя скидка</div>
+    </div>
+
+    <table class="history-table">
+        <thead>
+            <tr>
+                <th>Дата</th>
+                <th>Услуга</th>
+                <th>Мастер</th>
+                <th>Стоимость</th>
+                <th>Бонусы</th>
+                <th>Статус</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for visit in visit_history %}
+            <tr>
+                <td>{{ visit.date|date:"d.m.Y" }}</td>
+                <td>{{ visit.service.name }}</td>
+                <td>{{ visit.master.name }}</td>
+                <td>{{ visit.price|floatformat:0 }} ₽</td>
+                <td>+{{ visit.bonus_earned|default:0 }}</td>
+                <td>{{ visit.get_status_display }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6">История пуста</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+
+<section id="profile" class="client-section">
+    <h2>Мой профиль</h2>
+    <form method="post">
+        {% csrf_token %}
+        <label>Имя: <input type="text" name="first_name" value="{{ user.first_name }}"></label>
+        <label>Фамилия: <input type="text" name="last_name" value="{{ user.last_name }}"></label>
+        <label>Email: <input type="email" name="email" value="{{ user.email }}"></label>
+        <label>Телефон: <input type="tel" name="phone" value="{{ user.profile.phone|default:'' }}"></label>
+        <label>Дата рождения: <input type="date" name="birthdate" value="{{ user.profile.birthdate|date:'Y-m-d'|default:'' }}"></label>
+        <label>Предпочтения: <textarea name="preferences">{{ user.profile.preferences|default:'' }}</textarea></label>
+        <button type="submit">Сохранить изменения</button>
+    </form>
+</section>
+
+<section id="bonuses" class="client-section">
+    <h2>Мои бонусы</h2>
+    <div class="bonus-balance">
+        <h3>Баланс бонусов</h3>
+        <p class="bonus-amount">{{ bonus_points|default:0|intcomma }}</p>
+        <p>1 бонус = 1 рубль</p>
+        <button class="btn">Потратить бонусы</button>
+    </div>
+    <div class="bonus-rules">
+        <h3>Как накопить бонусы?</h3>
+        <ul>
+            <li>10% от суммы заказа начисляется на бонусный счёт</li>
+            <li>+500 бонусов за первую запись</li>
+            <li>+1000 бонусов в день рождения</li>
+            <li>+200 бонусов за отзыв</li>
+        </ul>
+    </div>
+</section>
+{% endblock %}

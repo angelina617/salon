@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+{% load static humanize %}
+
+{% block title %}{{ page_title|default:"Админ-панель — TanGel" }}{% endblock %}
+
+{% block content %}
+<div class="admin-dashboard">
+    <header class="dashboard-header">
+        <h1>{{ dashboard_title|default:"Панель управления салоном" }}</h1>
+        <div class="dashboard-stats">
+            <div>📅 {{ today_bookings_count|default:0 }} записей сегодня</div>
+            <div>👥 {{ current_clients_count|default:0 }} клиентов в салоне</div>
+            <div>₽ {{ today_revenue|default:0|intcomma }} выручка</div>
+            <div>🕗 {{ current_time|time:"H:i" }}</div>
+        </div>
+        <div class="user-info">
+            {% if user.profile.avatar %}
+                <img src="{{ user.profile.avatar.url }}" alt="Аватар" class="avatar">
+            {% else %}
+                <div class="avatar-placeholder">👤</div>
+            {% endif %}
+            <div>
+                <strong>{{ user.get_full_name|default:user.username }}</strong><br>
+                {% if user.is_superuser %}
+                    <span class="role">Суперадминистратор</span>
+                {% elif user.is_staff %}
+                    <span class="role">Администратор</span>
+                {% endif %}<br>
+                Последний вход: {{ user.last_login|date:"d.m.Y H:i"|default:"Недавно" }}
+            </div>
+        </div>
+    </header>
+
+    <aside class="admin-sidebar">
+        <h3>Управление</h3>
+        <ul>
+            <li><a href="#dashboard">Дашборд</a></li>
+            <li><a href="#bookings">Записи <span class="badge">{{ pending_bookings_count|default:0 }}</span></a></li>
+            <li><a href="#clients">Клиенты <span class="badge">{{ total_clients_count|default:0 }}</span></a></li>
+            <li><a href="#masters">Мастера <span class="badge">{{ active_masters_count|default:0 }}</span></a></li>
+            <li><a href="#schedule">Расписание</a></li>
+        </ul>
+
+        <h3>Финансы</h3>
+        <ul>
+            <li><a href="#analytics">Аналитика</a></li>
+            <li><a href="#payments">Платежи</a></li>
+            <li><a href="#reports">Отчёты</a></li>
+            <li><a href="#expenses">Расходы</a></li>
+        </ul>
+
+        <h3>Настройки</h3>
+        <ul>
+            <li><a href="#services">Услуги</a></li>
+            <li><a href="#promotions">Акции <span class="badge">{{ active_promotions_count|default:0 }}</span></a></li>
+            <li><a href="#employees">Сотрудники</a></li>
+            <li><a href="#settings">Настройки салона</a></li>
+        </ul>
+
+        <div class="quick-actions">
+            <button class="btn">Добавить запись</button>
+            <button class="btn">Добавить клиента</button>
+            <button class="btn">Добавить расход</button>
+        </div>
+    </aside>
+
+    <main class="admin-content">
+        <section id="dashboard">
+            <h2>Общая статистика</h2>
+            <div class="period-selector">
+                <button>Сегодня</button>
+                <button>Эта неделя</button>
+                <button>Этот месяц</button>
+                <button>Этот год</button>
+                <button>Выбрать период</button>
+                <button>Обновить</button>
+            </div>
+            {% include 'admin/includes/stats_cards.html' %}
+
+            <h3>Выручка по дням</h3>
+            <div class="chart-period-toggle">
+                <button>Текущий период</button>
+                <button>Прошлый период</button>
+            </div>
+
+            <h3>Посещаемость</h3>
+            <div class="chart-type-toggle">
+                <button>По дням</button>
+                <button>По неделям</button>
+                <button>По месяцам</button>
+            </div>
+
+            <h3>Популярные услуги</h3>
+            {% for service in popular_services %}
+            <div class="service-item">
+                <strong>{{ service.name }}</strong>
+                <span>{{ service.booking_count }} ({{ service.revenue|floatformat:0|intcomma }} ₽)</span>
+            </div>
+            {% empty %}
+            <p>Нет данных о услугах</p>
+            {% endfor %}
+
+            <h3>Топ мастера</h3>
+            {% for master in top_masters %}
+            <div class="master-card">
+                {% if master.photo %}
+                    <img src="{{ master.photo.url }}" alt="{{ master.name }}">
+                {% else %}
+                    <div class="avatar-placeholder">👤</div>
+                {% endif %}
+                <div>
+                    <h4>{{ master.name }}</h4>
+                    <p>{{ master.specialization }}</p>
+                    <p>{{ master.booking_count }} записей | {{ master.revenue|floatformat:0|intcomma }} ₽ | {{ master.rating|floatformat:1 }}/5</p>
+                </div>
+            </div>
+            {% empty %}
+            <p>Нет данных о мастерах</p>
+            {% endfor %}
+
+            <h3>Последние записи</h3>
+            <a href="#bookings">Все записи →</a>
+            {% for booking in recent_bookings %}
+            <div class="booking-row">
+                <div>{{ booking.datetime|date:"H:i" }}</div>
+                <div>{{ booking.datetime|date:"d.m.Y" }}</div>
+                <div>{{ booking.client.get_full_name|default:booking.client.username }}</div>
+                <div>{{ booking.service.name }}</div>
+                <div>{{ booking.master.name|default:"Любой" }}</div>
+                <div class="status {{ booking.status }}">{{ booking.get_status_display }}</div>
+                {% if booking.status == 'pending' %}
+                    <button>Подтвердить</button>
+                {% endif %}
+            </div>
+            {% empty %}
+            <p>Нет последних записей</p>
+            {% endfor %}
+        </section>
+
+        <!-- Другие секции можно реализовать аналогично -->
+    </main>
+</div>
+{% endblock %}
