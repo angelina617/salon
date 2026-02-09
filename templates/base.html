@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}TanGel{% endblock %}</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <a href="{% url 'index' %}">✨ TanGel</a>
+        </div>
+        <nav>
+            <a href="{% url 'index' %}">Главная</a>
+            <a href="{% url 'services' %}">Услуги</a>
+            <a href="{% url 'masters' %}">Мастера</a>
+            <a href="{% url 'promotions' %}">Акции</a>
+            <a href="{% url 'booking' %}">Запись</a>
+            <a href="{% url 'admin:index' %}">Админка</a>
+            <a href="{% url 'client' %}">Кабинет</a>
+        </nav>
+    </header>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        <div class="footer-contact">
+            <h3>Контакты</h3>
+            <p>г. Красноярск, ул. Матросова, д. 1</p>
+            <p>+7 (391) 123-45-67</p>
+            <p>info@tangel-beauty.ru</p>
+        </div>
+        <div class="footer-hours">
+            <h3>Часы работы</h3>
+            <p>Пн–Пт: 9:00 – 21:00</p>
+            <p>Сб: 10:00 – 20:00</p>
+            <p>Вс: 10:00 – 18:00</p>
+        </div>
+        <div class="footer-links">
+            <h3>Быстрые ссылки</h3>
+            <a href="{% url 'index' %}">Главная</a><br>
+            <a href="{% url 'services' %}">Услуги</a><br>
+            <a href="{% url 'masters' %}">Мастера</a><br>
+            <a href="{% url 'promotions' %}">Акции</a>
+        </div>
+        <div class="footer-copyright">
+            <p>© 2026 Салон красоты TanGel. Все права защищены.</p>
+            <p>Сайт разработан для учебной практики</p>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,208 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title|default:"Онлайн запись - Салон красоты TanGel" }}{% endblock %}
+
+{% block extra_css %}
+    <!-- Можно добавить специфичные стили позже -->
+{% endblock %}
+
+{% block content %}
+<div class="booking-hero">
+    <h1>{{ hero_title|default:"Онлайн запись" }}</h1>
+    <p>{{ hero_subtitle|default:"Заполните форму и мы свяжемся с вами для подтверждения времени" }}</p>
+    <div class="booking-benefits">
+        <span>Быстрое подтверждение</span>
+        <span>Удобное время</span>
+        <span>{{ discount_text|default:"Скидка 10% при первой записи" }}</span>
+    </div>
+</div>
+
+<h2>{{ form_title|default:"Форма записи на прием" }}</h2>
+<p>{{ form_subtitle|default:"Заполните все поля — мы перезвоним вам в течение 30 минут" }}</p>
+
+<form method="post" id="booking-form">
+    {% csrf_token %}
+
+    <!-- Шаг 1: Услуга -->
+    <section class="booking-step">
+        <h3>1. Выберите услугу</h3>
+        {% if categories %}
+            <div class="categories">
+                {% for category in categories %}
+                    <button type="button" class="category-btn">{{ category.name }}</button>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="services-list">
+            {% for service in services %}
+            <div class="service-option" data-service-id="{{ service.id }}">
+                <h4>{{ service.name }}</h4>
+                <p>{{ service.short_description|default:service.description|truncatechars:50 }}</p>
+                <div class="service-meta">
+                    <span>{{ service.duration }} мин</span>
+                    <span>{{ service.price|floatformat:0 }} ₽</span>
+                </div>
+            </div>
+            {% empty %}
+            <p>Услуги временно недоступны</p>
+            {% endfor %}
+        </div>
+        <p><strong>Выбрано:</strong> <span id="selected-service">Не выбрано</span></p>
+    </section>
+
+    <!-- Шаг 2: Мастер -->
+    <section class="booking-step">
+        <h3>2. Выберите мастера</h3>
+        <label>
+            <input type="radio" name="master" value="" checked>
+            Любой свободный мастер — мы подберём специалиста под вашу услугу
+        </label>
+
+        {% for master in masters %}
+        <label class="master-option">
+            <input type="radio" name="master" value="{{ master.id }}">
+            <div class="master-info">
+                <strong>{{ master.name }}</strong>
+                <p>{{ master.get_main_specialization }} · {{ master.experience }} лет опыта</p>
+                <div class="rating">
+                    {% with rating=master.average_rating|default:0 %}
+                        {% for i in "12345"|make_list %}
+                            {% if forloop.counter <= rating|floatformat:0 %}
+                                ★
+                            {% elif forloop.counter|add:"-0.5" <= rating %}
+                                ★½
+                            {% else %}
+                                ☆
+                            {% endif %}
+                        {% endfor %}
+                    {% endwith %}
+                </div>
+            </div>
+        </label>
+        {% empty %}
+        <p>Мастера временно недоступны</p>
+        {% endfor %}
+        <p><strong>Выбран мастер:</strong> <span id="selected-master">Любой</span></p>
+    </section>
+
+    <!-- Шаг 3: Дата и время -->
+    <section class="booking-step">
+        <h3>3. Выберите дату и время</h3>
+        <label>
+            Выберите дату:
+            <input type="date" name="date" required>
+        </label>
+        <p>* Время указано с учётом выбранной услуги ({{ selected_duration|default:"60" }} мин)</p>
+        <div class="time-slots">
+            <!-- Временные слоты будут подгружаться через JS или сервер -->
+            <button type="button" disabled>Нет доступного времени</button>
+        </div>
+        <p><strong>Выбрано время:</strong> <span id="selected-time">Не выбрано</span></p>
+    </section>
+
+    <!-- Шаг 4: Контактные данные -->
+    <section class="booking-step">
+        <h3>4. Ваши контактные данные</h3>
+        {% if user.is_authenticated %}
+            <p>Ваши данные заполнены автоматически</p>
+        {% endif %}
+        <label>
+            Имя и фамилия *
+            <input type="text" name="full_name" value="{{ user.get_full_name }}" required>
+        </label>
+        <label>
+            Телефон *
+            <input type="tel" name="phone" value="{{ user.profile.phone|default:'' }}" required>
+        </label>
+        <label>
+            Email (для подтверждения) *
+            <input type="email" name="email" value="{{ user.email }}" required>
+        </label>
+        <label>
+            Комментарий к записи
+            <textarea name="comment"></textarea>
+        </label>
+    </section>
+
+    <!-- Шаг 5: Дополнительно -->
+    <section class="booking-step">
+        <h3>5. Дополнительные опции</h3>
+        {% if is_first_visit %}
+        <label>
+            <input type="checkbox" name="first_visit_discount">
+            Первый визит — скидка {{ discount_percent|default:10 }}% на первую услугу
+        </label>
+        {% endif %}
+        <label>
+            <input type="checkbox" name="gift_certificate">
+            Оформить как подарок
+        </label>
+        <label>
+            <input type="checkbox" name="newsletter" checked>
+            Получать новости об акциях
+        </label>
+        <label>
+            <input type="checkbox" name="reminders" checked>
+            SMS и email-напоминания
+        </label>
+    </section>
+
+    <!-- Итог -->
+    <section class="booking-summary">
+        <h3>Итого:</h3>
+        <p>Услуга: <span id="summary-service">Не выбрана</span></p>
+        <p>Мастер: <span id="summary-master">Любой</span></p>
+        <p>Дата и время: <span id="summary-datetime">Не выбрано</span></p>
+        <p>Стоимость: <span id="summary-price">0</span> ₽</p>
+        {% if discount_percent %}
+        <p>Скидка ({{ discount_percent }}%): <span id="summary-discount">-0</span> ₽</p>
+        <p><strong>Итого к оплате: <span id="summary-total">0</span> ₽</strong></p>
+        {% endif %}
+    </section>
+
+    <!-- Согласия -->
+    <div class="consent-section">
+        <label>
+            <input type="checkbox" required>
+            Я соглашаюсь с <a href="{% url 'terms' %}">правилами записи</a>
+            и даю согласие на <a href="{% url 'privacy' %}">обработку персональных данных</a> *
+        </label>
+    </div>
+
+    <div class="form-actions">
+        <button type="button" class="btn-outline">Назад</button>
+        <button type="button" class="btn-outline">Далее</button>
+        <button type="submit" class="btn">Отправить заявку на запись</button>
+    </div>
+</form>
+
+<p class="booking-note">
+    После отправки формы мы свяжемся с вами для уточнения деталей и подтверждения времени.
+</p>
+
+<!-- Преимущества -->
+<h2>{{ benefits_title|default:"Почему стоит записываться онлайн?" }}</h2>
+<div class="benefits-grid">
+    {% for benefit in benefits %}
+    <div class="benefit-card">
+        <h4>{{ benefit.title }}</h4>
+        <p>{{ benefit.description }}</p>
+    </div>
+    {% empty %}
+    <div class="benefit-card">
+        <h4>Круглосуточная запись</h4>
+        <p>Записывайтесь в любое время, даже ночью</p>
+    </div>
+    <div class="benefit-card">
+        <h4>Бронирование времени</h4>
+        <p>Ваше время будет закреплено за вами</p>
+    </div>
+    <div class="benefit-card">
+        <h4>Напоминания</h4>
+        <p>СМС и email-напоминания о визите</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
