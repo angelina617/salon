@@ -1,495 +1,285 @@
-.client-dashboard {
-    padding: 40px 0;
-    background: #f5f5f7;
-    min-height: calc(100vh - 80px);
+/* Личный кабинет клиента — client.css */
+
+.profile-header {
+  background: linear-gradient(135deg, var(--primary-main), var(--accent));
+  color: var(--white);
+  padding: 2rem 5%;
+  border-radius: 0 0 20px 20px;
+  margin-bottom: 2.5rem;
+  text-align: center;
 }
 
-/* Шапка кабинета */
-.dashboard-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: white;
-    padding: 30px;
-    border-radius: 20px;
-    margin-bottom: 30px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+.profile-header h1 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
 }
 
-.user-info {
-    display: flex;
-    align-items: center;
-    gap: 25px;
+.profile-meta {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+  font-size: 0.95rem;
 }
 
-.user-avatar-large {
-    width: 100px;
-    height: 100px;
-    background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 3.5rem;
-    color: white;
+.profile-meta span {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 0.3rem 1rem;
+  border-radius: 20px;
 }
 
-.user-details h1 {
-    font-size: 2rem;
-    margin-bottom: 5px;
-    color: #333;
+/* Навигация по разделам */
+.client-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-bottom: 2rem;
+  justify-content: center;
 }
 
-.user-email {
-    color: #666;
-    margin-bottom: 15px;
+.nav-tab {
+  padding: 0.6rem 1.2rem;
+  background: var(--white);
+  border-radius: 30px;
+  text-decoration: none;
+  color: var(--text-primary);
+  font-weight: 500;
+  box-shadow: 0 2px 6px var(--shadow);
+  transition: all 0.2s;
 }
 
-.user-stats {
-    display: flex;
-    gap: 25px;
+.nav-tab:hover,
+.nav-tab.active {
+  background: var(--accent);
+  color: var(--white);
 }
 
-.stat {
-    text-align: center;
+/* Общие карточки секций */
+.section-card {
+  background: var(--white);
+  padding: 1.8rem;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px var(--shadow);
+  margin-bottom: 2rem;
 }
 
-.stat strong {
-    display: block;
-    font-size: 1.5rem;
-    color: #a18cd1;
+.section-title {
+  color: var(--accent);
+  margin-bottom: 1.2rem;
+  font-size: 1.4rem;
 }
 
-.quick-actions {
-    display: flex;
-    gap: 15px;
+/* Статистика (посещения, бонусы и т.д.) */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
 }
 
-/* Основная сетка */
-.dashboard-grid {
-    display: grid;
-    grid-template-columns: 250px 1fr;
-    gap: 30px;
+.stat-item {
+  text-align: center;
+  padding: 1rem;
+  background: var(--primary-light);
+  border-radius: 12px;
 }
 
-/* Боковое меню */
-.client-sidebar {
-    background: white;
-    border-radius: 20px;
-    padding: 20px 0;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-    height: fit-content;
-}
-
-.client-menu {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-}
-
-.menu-item {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    padding: 15px 25px;
-    color: #666;
-    text-decoration: none;
-    transition: all 0.3s ease;
-    border-left: 4px solid transparent;
-}
-
-.menu-item:hover {
-    background: #f9f5ff;
-    color: #a18cd1;
-}
-
-.menu-item.active {
-    background: #f9f5ff;
-    color: #a18cd1;
-    border-left-color: #a18cd1;
-}
-
-.menu-item i {
-    font-size: 1.2rem;
-    width: 24px;
-}
-
-.menu-item.logout {
-    margin-top: 20px;
-    color: #ff4757;
-}
-
-.menu-item.logout:hover {
-    background: #ffeaea;
-}
-
-/* Основной контент */
-.client-content {
-    display: flex;
-    flex-direction: column;
-    gap: 30px;
-}
-
-.content-section {
-    display: none;
-    background: white;
-    border-radius: 20px;
-    padding: 30px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-}
-
-.content-section.active {
-    display: block;
-}
-
-.section-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 25px;
-    padding-bottom: 20px;
-    border-bottom: 2px solid #f0f0f0;
-}
-
-.section-header h2 {
-    font-size: 1.8rem;
-    color: #333;
-}
-
-/* Список записей */
-.appointments-list {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-.appointment-card {
-    border: 2px solid #e0e0e0;
-    border-radius: 15px;
-    overflow: hidden;
-    transition: all 0.3s ease;
-}
-
-.appointment-card.next {
-    border-color: #a18cd1;
-    background: #f9f5ff;
-}
-
-.appointment-card.past {
-    opacity: 0.8;
-}
-
-.appointment-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 15px 20px;
-    background: #f9f9f9;
-    border-bottom: 1px solid #e0e0e0;
-}
-
-.appointment-badge {
-    background: #4cd964;
-    color: white;
-    padding: 5px 15px;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    font-weight: 600;
-}
-
-.appointment-date {
-    color: #666;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.appointment-body {
-    padding: 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.appointment-info h3 {
-    font-size: 1.3rem;
-    margin-bottom: 10px;
-    color: #333;
-}
-
-.appointment-details {
-    display: flex;
-    gap: 20px;
-    flex-wrap: wrap;
-}
-
-.detail {
-    color: #666;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-
-.detail.rating {
-    color: #ffc107;
-}
-
-.appointment-actions {
-    display: flex;
-    gap: 10px;
-}
-
-.btn-small {
-    padding: 8px 15px;
-    font-size: 0.9rem;
-}
-
-.status-badge {
-    padding: 5px 12px;
-    border-radius: 15px;
-    font-size: 0.8rem;
-    font-weight: 600;
-}
-
-.status-badge.completed {
-    background: #e8f5e9;
-    color: #2e7d32;
-}
-
-/* Статистика */
-.history-stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
-    margin-bottom: 30px;
-}
-
-.stat-card {
-    background: #f9f5ff;
-    border-radius: 15px;
-    padding: 20px;
-    display: flex;
-    align-items: center;
-    gap: 20px;
-}
-
-.stat-icon {
-    width: 60px;
-    height: 60px;
-    background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.8rem;
-    color: white;
-}
-
-.stat-content {
-    flex: 1;
-}
-
-.stat-number {
-    font-size: 2rem;
-    font-weight: 700;
-    color: #333;
-    margin-bottom: 5px;
+.stat-value {
+  font-size: 1.6rem;
+  font-weight: bold;
+  color: var(--accent);
+  margin-bottom: 0.3rem;
 }
 
 .stat-label {
-    color: #666;
-    font-size: 0.9rem;
+  font-size: 0.9rem;
+  color: var(--text-light);
 }
 
-/* Таблица истории */
-.history-table {
-    overflow-x: auto;
+/* Таблица истории посещений */
+.visits-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
 }
 
-.history-table table {
-    width: 100%;
-    border-collapse: collapse;
+.visits-table th,
+.visits-table td {
+  padding: 0.8rem;
+  text-align: left;
+  border-bottom: 1px solid #eee;
 }
 
-.history-table th {
-    background: #f9f5ff;
-    padding: 15px;
-    text-align: left;
-    font-weight: 600;
-    color: #333;
-    border-bottom: 2px solid #e0e0e0;
+.visits-table th {
+  color: var(--accent);
+  font-weight: 600;
 }
 
-.history-table td {
-    padding: 15px;
-    border-bottom: 1px solid #eee;
-    color: #666;
-}
-
-.status {
-    padding: 5px 12px;
-    border-radius: 15px;
-    font-size: 0.8rem;
-    font-weight: 600;
-}
-
-.status.completed {
-    background: #e8f5e9;
-    color: #2e7d32;
+.visits-table tr:last-child td {
+  border-bottom: none;
 }
 
 /* Форма профиля */
-.profile-form {
-    max-width: 800px;
-}
-
 .profile-form .form-group {
-    margin-bottom: 20px;
+  margin-bottom: 1.2rem;
 }
 
 .profile-form label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: 500;
-    color: #333;
+  display: block;
+  margin-bottom: 0.4rem;
+  font-weight: 500;
+  color: var(--text-primary);
 }
 
 .profile-form input,
 .profile-form textarea {
-    width: 100%;
-    padding: 12px 15px;
-    border: 2px solid #e0e0e0;
-    border-radius: 10px;
-    font-size: 1rem;
-    transition: all 0.3s ease;
+  width: 100%;
+  padding: 0.7rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
 }
 
 .profile-form input:focus,
 .profile-form textarea:focus {
-    outline: none;
-    border-color: #a18cd1;
-}
-
-.profile-form .form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(173, 20, 87, 0.15);
 }
 
 /* Бонусы */
 .bonus-balance {
-    display: grid;
-    grid-template-columns: 300px 1fr;
-    gap: 30px;
+  text-align: center;
+  font-size: 2.2rem;
+  font-weight: bold;
+  color: var(--accent);
+  margin: 1rem 0;
 }
 
-.balance-card {
-    background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
-    border-radius: 20px;
-    padding: 30px;
-    color: white;
-    text-align: center;
+.bonus-info {
+  background: var(--primary-light);
+  padding: 1rem;
+  border-radius: 12px;
+  margin-top: 1rem;
+  font-size: 0.95rem;
 }
 
-.balance-card h3 {
-    margin-bottom: 20px;
-    font-size: 1.5rem;
+/* Записи */
+.booking-list {
+  margin-top: 1rem;
 }
 
-.balance-amount {
-    font-size: 3.5rem;
-    font-weight: 700;
-    margin-bottom: 10px;
+.booking-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border: 1px solid #f0f0f0;
+  border-radius: 12px;
+  margin-bottom: 0.8rem;
+  background: var(--white);
 }
 
-.balance-actions {
-    margin-top: 25px;
+.booking-info h4 {
+  color: var(--accent);
+  margin-bottom: 0.3rem;
 }
 
-.bonus-info h3 {
-    font-size: 1.5rem;
-    margin-bottom: 20px;
-    color: #333;
+.booking-actions a {
+  margin-left: 0.8rem;
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 0.9rem;
 }
 
-.bonus-rules {
-    list-style: none;
-    padding: 0;
-}
-
-.bonus-rules li {
-    padding: 10px 0;
-    display: flex;
-    align-items: flex-start;
-    gap: 15px;
-    color: #666;
-}
-
-.bonus-rules i {
-    color: #4cd964;
-    margin-top: 3px;
+.empty-state {
+  text-align: center;
+  color: var(--text-light);
+  padding: 1.5rem;
+  font-style: italic;
 }
 
 /* Адаптивность */
-@media (max-width: 992px) {
-    .dashboard-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .dashboard-header {
-        flex-direction: column;
-        gap: 25px;
-        text-align: center;
-    }
-    
-    .user-info {
-        flex-direction: column;
-        text-align: center;
-    }
-    
-    .quick-actions {
-        flex-direction: column;
-        width: 100%;
-    }
-    
-    .bonus-balance {
-        grid-template-columns: 1fr;
-    }
-}
-
 @media (max-width: 768px) {
-    .appointment-body {
-        flex-direction: column;
-        gap: 20px;
-        align-items: flex-start;
-    }
-    
-    .appointment-actions {
-        width: 100%;
-        justify-content: center;
-    }
-    
-    .history-stats {
-        grid-template-columns: 1fr;
-    }
-    
-    .profile-form .form-row {
-        grid-template-columns: 1fr;
-    }
+  .profile-header h1 {
+    font-size: 1.6rem;
+  }
+
+  .profile-meta {
+    gap: 0.6rem;
+    font-size: 0.85rem;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .booking-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.8rem;
+  }
+
+  .booking-actions {
+    align-self: stretch;
+    display: flex;
+    gap: 0.8rem;
+    margin-top: 0.5rem;
+  }
+
+  .visits-table,
+  .visits-table thead,
+  .visits-table tbody,
+  .visits-table th,
+  .visits-table td {
+    display: block;
+  }
+
+  .visits-table thead tr {
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+  }
+
+  .visits-table tr {
+    border: 1px solid #eee;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    border-radius: 12px;
+  }
+
+  .visits-table td {
+    text-align: right;
+    padding-left: 50%;
+    position: relative;
+  }
+
+  .visits-table td::before {
+    content: attr(data-label);
+    position: absolute;
+    left: 0.8rem;
+    top: 0.8rem;
+    font-weight: 600;
+    color: var(--accent);
+  }
 }
 
-@media (max-width: 576px) {
-    .client-dashboard {
-        padding: 20px 0;
-    }
-    
-    .dashboard-header,
-    .content-section {
-        padding: 20px;
-    }
-    
-    .appointment-details {
-        flex-direction: column;
-        gap: 10px;
-    }
+@media (max-width: 480px) {
+  .profile-header {
+    padding: 1.5rem 5%;
+  }
+
+  .nav-tab {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  .bonus-balance {
+    font-size: 1.8rem;
+  }
+
+  .stat-value {
+    font-size: 1.3rem;
+  }
 }

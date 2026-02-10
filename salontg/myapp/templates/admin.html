@@ -3,6 +3,10 @@
 
 {% block title %}{{ page_title|default:"Админ-панель — TanGel" }}{% endblock %}
 
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'admin.css' %}">
+{% endblock %}
+
 {% block content %}
 <div class="admin-dashboard">
     <header class="dashboard-header">
