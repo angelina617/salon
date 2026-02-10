@@ -9,6 +9,9 @@
     <p>{{ hero_subtitle|default:"Полный спектр beauty-услуг от профессионалов с использованием премиальной косметики" }}</p>
 </div>
 
+
+{{ context }}
+
 {% if categories %}
     <div class="services-categories">
         {% for category in categories %}
