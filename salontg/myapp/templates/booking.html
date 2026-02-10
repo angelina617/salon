@@ -1,403 +1,208 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Онлайн запись - Салон красоты TanGel</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/booking.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600&display=swap" rel="stylesheet">
-</head>
-<body>
-    <!-- Header -->
-    <header class="header">
-        <nav class="navbar">
-            <div class="container">
-                <a href="index.html" class="logo">
-                    <span class="logo-icon">✨</span>
-                    <span class="logo-text">TanGel</span>
-                    <span class="logo-sub">Beauty Salon</span>
-                </a>
-                
-                <div class="nav-menu">
-                    <a href="index.html" class="nav-link">Главная</a>
-                    <a href="services.html" class="nav-link">Услуги</a>
-                    <a href="masters.html" class="nav-link">Мастера</a>
-                    <a href="promotions.html" class="nav-link">Акции</a>
-                    <a href="booking.html" class="nav-link active">Запись</a>
-                </div>
-                
-                <div class="nav-contacts">
-                    <a href="tel:+79991234567" class="phone">
-                        <i class="fas fa-phone"></i>
-                        +7 (999) 123-45-67
-                    </a>
-                    <a href="#booking-form" class="btn btn-primary">Записаться</a>
-                </div>
-                
-                <button class="menu-toggle">
-                    <i class="fas fa-bars"></i>
-                </button>
-            </div>
-        </nav>
-    </header>
+{% extends 'base.html' %}
+{% load static %}
 
-    <section class="booking-hero">
-        <div class="container">
-            <div class="hero-content">
-                <h1>Онлайн запись</h1>
-                <p>Заполните форму и мы свяжемся с вами для подтверждения времени</p>
-                <div class="hero-features">
-                    <div class="feature">
-                        <i class="fas fa-clock"></i>
-                        <span>Быстрое подтверждение</span>
-                    </div>
-                    <div class="feature">
-                        <i class="fas fa-calendar-check"></i>
-                        <span>Удобное время</span>
-                    </div>
-                    <div class="feature">
-                        <i class="fas fa-percentage"></i>
-                        <span>Скидка 10% при первой записи</span>
-                    </div>
+{% block title %}{{ page_title|default:"Онлайн запись - Салон красоты TanGel" }}{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'booking.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="booking-hero">
+    <h1>{{ hero_title|default:"Онлайн запись" }}</h1>
+    <p>{{ hero_subtitle|default:"Заполните форму и мы свяжемся с вами для подтверждения времени" }}</p>
+    <div class="booking-benefits">
+        <span>Быстрое подтверждение</span>
+        <span>Удобное время</span>
+        <span>{{ discount_text|default:"Скидка 10% при первой записи" }}</span>
+    </div>
+</div>
+
+<h2>{{ form_title|default:"Форма записи на прием" }}</h2>
+<p>{{ form_subtitle|default:"Заполните все поля — мы перезвоним вам в течение 30 минут" }}</p>
+
+<form method="post" id="booking-form">
+    {% csrf_token %}
+
+    <!-- Шаг 1: Услуга -->
+    <section class="booking-step">
+        <h3>1. Выберите услугу</h3>
+        {% if categories %}
+            <div class="categories">
+                {% for category in categories %}
+                    <button type="button" class="category-btn">{{ category.name }}</button>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="services-list">
+            {% for service in services %}
+            <div class="service-option" data-service-id="{{ service.id }}">
+                <h4>{{ service.name }}</h4>
+                <p>{{ service.short_description|default:service.description|truncatechars:50 }}</p>
+                <div class="service-meta">
+                    <span>{{ service.duration }} мин</span>
+                    <span>{{ service.price|floatformat:0 }} ₽</span>
                 </div>
             </div>
+            {% empty %}
+            <p>Услуги временно недоступны</p>
+            {% endfor %}
         </div>
+        <p><strong>Выбрано:</strong> <span id="selected-service">Не выбрано</span></p>
     </section>
 
-    <section class="booking-form-section" id="booking-form">
-        <div class="container">
-            <div class="form-intro">
-                <h2>Форма записи на прием</h2>
-                <p>Заполните все поля - мы перезвоним вам в течение 30 минут</p>
-            </div>
-            
-            <form class="simple-booking-form" action="#" method="post">
-                <!-- Раздел 1: Выбор услуги -->
-                <fieldset class="form-section">
-                    <legend><span class="legend-number">1</span> Выберите услугу</legend>
-                    
-                    <div class="services-grid">
-                        <!-- Услуга 1 -->
-                        <div class="service-option">
-                            <input type="radio" name="service" id="service-haircut" value="Женская стрижка" required>
-                            <label for="service-haircut">
-                                <span class="service-title">Женская стрижка</span>
-                                <span class="service-desc">Стрижка, мытье, укладка</span>
-                                <span class="service-meta">
-                                    <span class="duration">60 мин</span>
-                                    <span class="price">1 500 ₽</span>
-                                </span>
-                            </label>
-                        </div>
-                        
-                        <!-- Услуга 2 -->
-                        <div class="service-option">
-                            <input type="radio" name="service" id="service-coloring" value="Окрашивание волос">
-                            <label for="service-coloring">
-                                <span class="service-title">Окрашивание волос</span>
-                                <span class="service-desc">Полное окрашивание</span>
-                                <span class="service-meta">
-                                    <span class="duration">120 мин</span>
-                                    <span class="price">3 500 ₽</span>
-                                </span>
-                            </label>
-                        </div>
-                        
-                        <!-- Услуга 3 -->
-                        <div class="service-option">
-                            <input type="radio" name="service" id="service-manicure" value="Маникюр">
-                            <label for="service-manicure">
-                                <span class="service-title">Маникюр</span>
-                                <span class="service-desc">Аппаратный + гель-лак</span>
-                                <span class="service-meta">
-                                    <span class="duration">90 мин</span>
-                                    <span class="price">1 200 ₽</span>
-                                </span>
-                            </label>
-                        </div>
-                        
-                        <!-- Услуга 4 -->
-                        <div class="service-option">
-                            <input type="radio" name="service" id="service-facial" value="Чистка лица">
-                            <label for="service-facial">
-                                <span class="service-title">Чистка лица</span>
-                                <span class="service-desc">Профессиональная чистка</span>
-                                <span class="service-meta">
-                                    <span class="duration">60 мин</span>
-                                    <span class="price">1 800 ₽</span>
-                                </span>
-                            </label>
-                        </div>
-                        
-                        <!-- Услуга 5 -->
-                        <div class="service-option">
-                            <input type="radio" name="service" id="service-massage" value="Массаж">
-                            <label for="service-massage">
-                                <span class="service-title">Расслабляющий массаж</span>
-                                <span class="service-desc">Общий массаж тела</span>
-                                <span class="service-meta">
-                                    <span class="duration">60 мин</span>
-                                    <span class="price">2 500 ₽</span>
-                                </span>
-                            </label>
-                        </div>
-                        
-                        <!-- Услуга 6 -->
-                        <div class="service-option">
-                            <input type="radio" name="service" id="service-spa" value="SPA-программа">
-                            <label for="service-spa">
-                                <span class="service-title">SPA-программа</span>
-                                <span class="service-desc">Комплекс процедур</span>
-                                <span class="service-meta">
-                                    <span class="duration">120 мин</span>
-                                    <span class="price">5 000 ₽</span>
-                                </span>
-                            </label>
-                        </div>
-                    </div>
-                </fieldset>
-                
-                <!-- Раздел 2: Выбор мастера -->
-                <fieldset class="form-section">
-                    <legend><span class="legend-number">2</span> Выберите мастера (необязательно)</legend>
-                    
-                    <div class="master-selection">
-                        <div class="master-option">
-                            <input type="radio" name="master" id="master-any" value="Любой мастер" checked>
-                            <label for="master-any">
-                                <div class="master-info">
-                                    <span class="master-name">Любой свободный мастер</span>
-                                    <span class="master-spec">Мы подберем специалиста под вашу услугу</span>
-                                </div>
-                            </label>
-                        </div>
-                        
-                        <div class="master-option">
-                            <input type="radio" name="master" id="master-anna" value="Анна">
-                            <label for="master-anna">
-                                <div class="master-info">
-                                    <span class="master-name">Анна</span>
-                                    <span class="master-spec">Мастер массажа · 8 лет опыта</span>
-                                    <span class="master-rating">★★★★☆ 4.8</span>
-                                </div>
-                            </label>
-                        </div>
-                        
-                        <div class="master-option">
-                            <input type="radio" name="master" id="master-elena" value="Елена">
-                            <label for="master-elena">
-                                <div class="master-info">
-                                    <span class="master-name">Мадина</span>
-                                    <span class="master-spec">Косметолог · 10 лет опыта</span>
-                                    <span class="master-rating">★★★★★ 5.0</span>
-                                </div>
-                            </label>
-                        </div>
-                        
-                        <div class="master-option">
-                            <input type="radio" name="master" id="master-maria" value="Мария">
-                            <label for="master-maria">
-                                <div class="master-info">
-                                    <span class="master-name">Мария</span>
-                                    <span class="master-spec">Стилист · 7 лет опыта</span>
-                                    <span class="master-rating">★★★★★ 5.0</span>
-                                </div>
-                            </label>
-                        </div>
-                    </div>
-                </fieldset>
-                
-                <!-- Раздел 3: Дата и время -->
-                <fieldset class="form-section">
-                    <legend><span class="legend-number">3</span> Выберите дату и время</legend>
-                    
-                    <div class="datetime-fields">
-                        <div class="form-group">
-                            <label for="booking-date">Предпочтительная дата *</label>
-                            <input type="date" id="booking-date" name="date" required min="2024-12-01">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="booking-time">Предпочтительное время *</label>
-                            <select id="booking-time" name="time" required>
-                                <option value="">Выберите время</option>
-                                <option value="9:00">9:00 - 10:00</option>
-                                <option value="10:00">10:00 - 11:00</option>
-                                <option value="11:00">11:00 - 12:00</option>
-                                <option value="12:00">12:00 - 13:00</option>
-                                <option value="14:00">14:00 - 15:00</option>
-                                <option value="15:00">15:00 - 16:00</option>
-                                <option value="16:00">16:00 - 17:00</option>
-                                <option value="17:00">17:00 - 18:00</option>
-                            </select>
-                        </div>
-                    </div>
-                </fieldset>
-                
-                <!-- Раздел 4: Контактные данные -->
-                <fieldset class="form-section">
-                    <legend><span class="legend-number">4</span> Ваши контактные данные</legend>
-                    
-                    <div class="contact-fields">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="client-name">Имя и фамилия *</label>
-                                <input type="text" id="client-name" name="name" required placeholder="Иванова Мария">
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="client-phone">Телефон *</label>
-                                <input type="tel" id="client-phone" name="phone" required placeholder="+7 (999) 123-45-67">
-                            </div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="client-email">Email (для подтверждения)</label>
-                            <input type="email" id="client-email" name="email" placeholder="ivanova@example.com">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="client-comment">Комментарий к записи</label>
-                            <textarea id="client-comment" name="comment" rows="3" placeholder="Особые пожелания, аллергии, предпочтения..."></textarea>
-                        </div>
-                    </div>
-                </fieldset>
-                
-                <!-- Раздел 5: Дополнительные опции -->
-                <fieldset class="form-section">
-                    <legend><span class="legend-number">5</span> Дополнительные опции</legend>
-                    
-                    <div class="options-grid">
-                        <div class="option-checkbox">
-                            <input type="checkbox" id="option-first" name="first_visit">
-                            <label for="option-first">
-                                <span class="option-title">Первый визит</span>
-                                <span class="option-desc">Скидка 10% на первую услугу</span>
-                            </label>
-                        </div>
-                        
-                        <div class="option-checkbox">
-                            <input type="checkbox" id="option-gift" name="gift_pack">
-                            <label for="option-gift">
-                                <span class="option-title">Подарочный набор</span>
-                                <span class="option-desc">Набор косметики в подарок (+500 ₽)</span>
-                            </label>
-                        </div>
-                        
-                        <div class="option-checkbox">
-                            <input type="checkbox" id="option-news" name="newsletter" checked>
-                            <label for="option-news">
-                                <span class="option-title">Рассылка</span>
-                                <span class="option-desc">Получать новости об акциях</span>
-                            </label>
-                        </div>
-                    </div>
-                </fieldset>
-                
-                <!-- Согласие -->
-                <div class="form-agreement">
-                    <div class="agreement-checkbox">
-                        <input type="checkbox" id="agreement" name="agreement" required>
-                        <label for="agreement">
-                            Я соглашаюсь с <a href="#" class="link">правилами записи</a> и даю согласие на обработку персональных данных *
-                        </label>
-                    </div>
-                </div>
-                
-                <!-- Кнопки -->
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary btn-large">
-                        <i class="fas fa-paper-plane"></i>
-                        Отправить заявку на запись
-                    </button>
-                    <p class="form-note">
-                        После отправки формы мы свяжемся с вами для уточнения деталей и подтверждения времени.
-                    </p>
-                </div>
-            </form>
+    <!-- Шаг 2: Мастер -->
+    <section class="booking-step">
+        <h3>2. Выберите мастера</h3>
+        <label>
+            <input type="radio" name="master" value="" checked>
+            Любой свободный мастер — мы подберём специалиста под вашу услугу
+        </label>
 
-    <section class="booking-benefits">
-        <div class="container">
-            <h2 class="section-title">Почему стоит записываться онлайн?</h2>
-            
-            <div class="benefits-grid">
-                <div class="benefit-card">
-                    <div class="benefit-icon">
-                        <i class="fas fa-clock"></i>
-                    </div>
-                    <h3>Круглосуточная запись</h3>
-                    <p>Записывайтесь в любое время, даже ночью</p>
-                </div>
-                
-                <div class="benefit-card">
-                    <div class="benefit-icon">
-                        <i class="fas fa-calendar-alt"></i>
-                    </div>
-                    <h3>Бронирование времени</h3>
-                    <p>Ваше время будет закреплено за вами</p>
-                </div>
-                
-                <div class="benefit-card">
-                    <div class="benefit-icon">
-                        <i class="fas fa-bell"></i>
-                    </div>
-                    <h3>Напоминания</h3>
-                    <p>СМС и email-напоминания о визите</p>
+        {% for master in masters %}
+        <label class="master-option">
+            <input type="radio" name="master" value="{{ master.id }}">
+            <div class="master-info">
+                <strong>{{ master.name }}</strong>
+                <p>{{ master.get_main_specialization }} · {{ master.experience }} лет опыта</p>
+                <div class="rating">
+                    {% with rating=master.average_rating|default:0 %}
+                        {% for i in "12345"|make_list %}
+                            {% if forloop.counter <= rating|floatformat:0 %}
+                                ★
+                            {% elif forloop.counter|add:"-0.5" <= rating %}
+                                ★½
+                            {% else %}
+                                ☆
+                            {% endif %}
+                        {% endfor %}
+                    {% endwith %}
                 </div>
             </div>
-        </div>
+        </label>
+        {% empty %}
+        <p>Мастера временно недоступны</p>
+        {% endfor %}
+        <p><strong>Выбран мастер:</strong> <span id="selected-master">Любой</span></p>
     </section>
 
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-grid">
-                <div class="footer-col">
-                    <div class="logo">
-                        <span class="logo-icon">✨</span>
-                        <span class="logo-text">TanGel</span>
-                    </div>
-                    <p class="footer-description">
-                        Салон красоты премиум-класса в Красноярске. Индивидуальный подход к каждому клиенту.
-                    </p>
-
-                </div>
-                
-                <div class="footer-col">
-                    <h3 class="footer-title">Контакты</h3>
-                    <ul class="footer-list">
-                        <li><i class="fas fa-map-marker-alt"></i> г. Красноярск, ул. Матросова, д. 1</li>
-                        <li><i class="fas fa-phone"></i> +7 (999) 123-45-67</li>
-                        <li><i class="fas fa-envelope"></i> info@tangel-beauty.ru</li>
-                        <li><i class="fas fa-clock"></i> Ежедневно 9:00-21:00</li>
-                    </ul>
-                </div>
-                
-                <div class="footer-col">
-                    <h3 class="footer-title">Часы работы</h3>
-                    <ul class="footer-list">
-                        <li>Запись онлайн: круглосуточно</li>
-                    </ul>
-                </div>
-                
-                <div class="footer-col">
-                    <h3 class="footer-title">Быстрые ссылки</h3>
-                    <ul class="footer-list">
-                        <li><a href="masters.html">Наши мастера</a></li>
-                        <li><a href="services.html">Услуги и цены</a></li>
-                        <li><a href="promotions.html">Акции и скидки</a></li>
-                        <li><a href="booking.html">Онлайн запись</a></li>
-                    </ul>
-                </div>
-            </div>
-            
-            <div class="footer-bottom">
-                <p>&copy; 2026 Салон красоты TanGel. Все права защищены.</p>
-                <p>Сайт разработан для практики</p>
-            </div>
+    <!-- Шаг 3: Дата и время -->
+    <section class="booking-step">
+        <h3>3. Выберите дату и время</h3>
+        <label>
+            Выберите дату:
+            <input type="date" name="date" required>
+        </label>
+        <p>* Время указано с учётом выбранной услуги ({{ selected_duration|default:"60" }} мин)</p>
+        <div class="time-slots">
+            <!-- Временные слоты будут подгружаться через JS или сервер -->
+            <button type="button" disabled>Нет доступного времени</button>
         </div>
-    </footer>
+        <p><strong>Выбрано время:</strong> <span id="selected-time">Не выбрано</span></p>
+    </section>
 
-</body>
-</html>
+    <!-- Шаг 4: Контактные данные -->
+    <section class="booking-step">
+        <h3>4. Ваши контактные данные</h3>
+        {% if user.is_authenticated %}
+            <p>Ваши данные заполнены автоматически</p>
+        {% endif %}
+        <label>
+            Имя и фамилия *
+            <input type="text" name="full_name" value="{{ user.get_full_name }}" required>
+        </label>
+        <label>
+            Телефон *
+            <input type="tel" name="phone" value="{{ user.profile.phone|default:'' }}" required>
+        </label>
+        <label>
+            Email (для подтверждения) *
+            <input type="email" name="email" value="{{ user.email }}" required>
+        </label>
+        <label>
+            Комментарий к записи
+            <textarea name="comment"></textarea>
+        </label>
+    </section>
+
+    <!-- Шаг 5: Дополнительно -->
+    <section class="booking-step">
+        <h3>5. Дополнительные опции</h3>
+        {% if is_first_visit %}
+        <label>
+            <input type="checkbox" name="first_visit_discount">
+            Первый визит — скидка {{ discount_percent|default:10 }}% на первую услугу
+        </label>
+        {% endif %}
+        <label>
+            <input type="checkbox" name="gift_certificate">
+            Оформить как подарок
+        </label>
+        <label>
+            <input type="checkbox" name="newsletter" checked>
+            Получать новости об акциях
+        </label>
+        <label>
+            <input type="checkbox" name="reminders" checked>
+            SMS и email-напоминания
+        </label>
+    </section>
+
+    <!-- Итог -->
+    <section class="booking-summary">
+        <h3>Итого:</h3>
+        <p>Услуга: <span id="summary-service">Не выбрана</span></p>
+        <p>Мастер: <span id="summary-master">Любой</span></p>
+        <p>Дата и время: <span id="summary-datetime">Не выбрано</span></p>
+        <p>Стоимость: <span id="summary-price">0</span> ₽</p>
+        {% if discount_percent %}
+        <p>Скидка ({{ discount_percent }}%): <span id="summary-discount">-0</span> ₽</p>
+        <p><strong>Итого к оплате: <span id="summary-total">0</span> ₽</strong></p>
+        {% endif %}
+    </section>
+
+    <!-- Согласия -->
+    <div class="consent-section">
+        <label>
+            <input type="checkbox" required>
+            Я соглашаюсь с правилами записи
+            и даю согласие на обработку персональных данных *
+        </label>
+    </div>
+
+    <div class="form-actions">
+        <button type="button" class="btn-outline">Назад</button>
+        <button type="button" class="btn-outline">Далее</button>
+        <button type="submit" class="btn">Отправить заявку на запись</button>
+    </div>
+</form>
+
+<p class="booking-note">
+    После отправки формы мы свяжемся с вами для уточнения деталей и подтверждения времени.
+</p>
+
+<!-- Преимущества -->
+<h2>{{ benefits_title|default:"Почему стоит записываться онлайн?" }}</h2>
+<div class="benefits-grid">
+    {% for benefit in benefits %}
+    <div class="benefit-card">
+        <h4>{{ benefit.title }}</h4>
+        <p>{{ benefit.description }}</p>
+    </div>
+    {% empty %}
+    <div class="benefit-card">
+        <h4>Круглосуточная запись</h4>
+        <p>Записывайтесь в любое время, даже ночью</p>
+    </div>
+    <div class="benefit-card">
+        <h4>Бронирование времени</h4>
+        <p>Ваше время будет закреплено за вами</p>
+    </div>
+    <div class="benefit-card">
+        <h4>Напоминания</h4>
+        <p>СМС и email-напоминания о визите</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

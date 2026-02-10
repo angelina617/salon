@@ -9,17 +9,13 @@ from .forms import RegisterForm, LoginForm, BookingForm
 
 # Create your views here.
 def index_page(request):
-    # Получаем популярные услуги (можно добавить поле is_popular в модель)
-    popular_services = Services.objects.all()[:4]  # Временно берем первые 4
+    popular_services = Services.objects.all()[:4]
+    featured_masters = Masters.objects.all()[:4]
     
-    # Получаем мастеров для отображения на главной
-    featured_masters = Masters.objects.all()[:4]  # Временно берем первых 4
-    
-    # Статистика (пример)
     stats = {
         'masters_count': Masters.objects.count(),
         'services_count': Services.objects.count(),
-        'happy_clients': Users.objects.filter(role='client').count()  # Пример
+        'happy_clients': Users.objects.filter(role='client').count()
     }
     
     context = {
@@ -34,56 +30,53 @@ def services_page(request):
     category_filter = request.GET.get('category', '')
     search_query = request.GET.get('search', '')
     
-    # Получаем все услуги
+    # Получаем все услуги из базы данных
     services_list = Services.objects.all()
     
-    # Применяем фильтры
+    # Фильтр по категории (это просто CharField с choices)
     if category_filter:
         services_list = services_list.filter(category=category_filter)
     
+    # Поиск по названию и описанию
     if search_query:
         services_list = services_list.filter(
             Q(name__icontains=search_query) |
             Q(description__icontains=search_query)
         )
     
-    # Пагинация
-    paginator = Paginator(services_list, 9)  # 9 услуг на странице
+    # Пагинация (9 услуг на страницу)
+    paginator = Paginator(services_list, 9)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     
-    # Получаем уникальные категории для фильтра
-    categories = Services.objects.values_list('category', 'category').distinct()
+    # Получаем уникальные категории из базы данных
+    categories = Services.objects.values_list('category', flat=True).distinct()
+    
+    # Преобразуем коды категорий в человекочитаемые названия
+    category_display = dict(Services.CATEGORY_CHOICES)
+    categories_display = [
+        {'code': cat, 'name': category_display.get(cat, cat)}
+        for cat in categories
+    ]
     
     context = {
         'page_obj': page_obj,
-        'categories': categories,
+        'categories': categories_display,
         'selected_category': category_filter,
         'search_query': search_query,
     }
     
     return render(request, 'services.html', context)
 
-def service_detail_page(request, service_id):
-    service = get_object_or_404(Services, id=service_id)
-    masters = Masters.objects.all()
-    
-    context = {
-        'service': service,
-        'masters': masters,
-        'user': request.session.get('user')
-    }
-    
-    return render(request, 'service_detail.html', context)
+# УДАЛЕНО: service_detail_page (нет соответствующего шаблона в списке)
+# Ссылки на детали услуги должны вести на services_page с фильтром или обрабатываться через JS
 
 def masters_page(request):
     specialization_filter = request.GET.get('specialization', '')
     search_query = request.GET.get('search', '')
     
-    # Получаем всех мастеров
     masters_list = Masters.objects.select_related('user').all()
     
-    # Применяем фильтры
     if specialization_filter:
         masters_list = masters_list.filter(specialization__icontains=specialization_filter)
     
@@ -94,12 +87,10 @@ def masters_page(request):
             Q(description__icontains=search_query)
         )
     
-    # Пагинация
-    paginator = Paginator(masters_list, 12)  # 12 мастеров на странице
+    paginator = Paginator(masters_list, 12)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     
-    # Получаем уникальные специализации
     specializations = Masters.objects.values_list('specialization', flat=True).distinct()
     
     context = {
@@ -111,27 +102,8 @@ def masters_page(request):
     
     return render(request, 'masters.html', context)
 
-# Детальная страница мастера
-def master_detail_page(request, master_id):
-    master = get_object_or_404(Masters, id=master_id)
-    
-    # Получаем услуги, которые предоставляет мастер
-    services = Services.objects.all()[:5]
-    
-    upcoming_appointments = Appointments.objects.filter(
-        master=master,
-        date__gte=date.today(),
-        status='confirmed'
-    ).order_by('date', 'time')[:5]
-    
-    context = {
-        'master': master,
-        'services': services,
-        'upcoming_appointments': upcoming_appointments,
-        'user': request.session.get('user')
-    }
-    
-    return render(request, 'master_detail.html', context)
+# УДАЛЕНО: master_detail_page (нет соответствующего шаблона в списке)
+# Детали мастера должны отображаться через модальные окна на masters_page или services_page
 
 def promotions_page(request):
     promotions = [
@@ -163,7 +135,6 @@ def booking_page(request):
     success_message = None
     
     if request.method == 'POST':
-        # Получаем данные из формы
         client_name = request.POST.get('client_name')
         client_phone = request.POST.get('client_phone')
         client_email = request.POST.get('client_email')
@@ -174,11 +145,9 @@ def booking_page(request):
         notes = request.POST.get('notes', '')
         
         try:
-            # Получаем объекты
             service = Services.objects.get(id=service_id)
             master = Masters.objects.get(id=master_id)
             
-            # Проверяем доступность времени
             is_time_available = not Appointments.objects.filter(
                 master=master,
                 date=appointment_date,
@@ -189,19 +158,17 @@ def booking_page(request):
             if not is_time_available:
                 error = "Выбранное время уже занято. Пожалуйста, выберите другое время."
             else:
-                # Создаем пользователя (или находим существующего)
                 user, created = Users.objects.get_or_create(
                     phone=client_phone,
                     defaults={
                         'first_name': client_name.split()[0] if client_name else 'Клиент',
                         'last_name': ' '.join(client_name.split()[1:]) if client_name and len(client_name.split()) > 1 else '',
                         'email': client_email,
-                        'password': 'default_password',  # В реальном проекте нужно генерировать
+                        'password': make_password('default_temp_password'),
                         'role': 'client',
                     }
                 )
                 
-                # Создаем запись
                 appointment = Appointments.objects.create(
                     client=user,
                     master=master,
@@ -221,40 +188,28 @@ def booking_page(request):
         except Exception as e:
             error = f"Произошла ошибка: {str(e)}"
     
-    # Получаем данные для формы
     services = Services.objects.all()
     masters = Masters.objects.all()
     
-    # Если передан мастер или услуга в GET-параметрах
     selected_master_id = request.GET.get('master_id')
     selected_service_id = request.GET.get('service_id')
     
-    selected_master = None
-    selected_service = None
+    selected_master = Masters.objects.filter(id=selected_master_id).first() if selected_master_id else None
+    selected_service = Services.objects.filter(id=selected_service_id).first() if selected_service_id else None
     
-    if selected_master_id:
-        try:
-            selected_master = Masters.objects.get(id=selected_master_id)
-        except Masters.DoesNotExist:
-            pass
-    
-    if selected_service_id:
-        try:
-            selected_service = Services.objects.get(id=selected_service_id)
-        except Services.DoesNotExist:
-            pass
-    
-    # Получаем занятое время для календаря (если выбраны мастер и дата)
     busy_times = []
     master_id_for_calendar = request.GET.get('master_for_calendar')
     date_for_calendar = request.GET.get('date_for_calendar')
     
     if master_id_for_calendar and date_for_calendar:
-        busy_times = Appointments.objects.filter(
+        busy_times = list(Appointments.objects.filter(
             master_id=master_id_for_calendar,
             date=date_for_calendar,
             status__in=['confirmed', 'pending']
-        ).values_list('time', flat=True)
+        ).values_list('time', flat=True))
+    
+    # Передаем user в контекст для отображения в шапке (если авторизован)
+    current_user = request.session.get('user')
     
     context = {
         'services': services,
@@ -265,29 +220,25 @@ def booking_page(request):
         'success_message': success_message,
         'busy_times': busy_times,
         'today': date.today().isoformat(),
+        'user': current_user,  # Для отображения статуса авторизации в шапке
     }
     
     return render(request, 'booking.html', context)
 
 # РЕГИСТРАЦИЯ И АВТОРИЗАЦИЯ
+# Шаблоны register.html и login.html должны существовать в проекте (не входят в основной список,
+# но критичны для работы). Если их нет - создайте на базе base.html
 
 def register_page(request):
-    """Страница регистрации с использованием формы"""
     if request.method == 'POST':
-        # Создаем форму с данными из POST-запроса
         form = RegisterForm(request.POST)
         
         if form.is_valid():
-            # form.cleaned_data содержит валидированные данные
-            # commit=False означает: создай объект, но не сохраняй в базу пока
             user = form.save(commit=False)
-            
-            # Хэшируем пароль (форма уже проверила, что пароли совпадают)
             user.password = make_password(form.cleaned_data['password'])
             user.role = 'client'
-            user.save()  # Теперь сохраняем в базу
+            user.save()
             
-            # Автоматически авторизуем пользователя
             request.session['user_id'] = user.id
             request.session['user'] = {
                 'id': user.id,
@@ -300,69 +251,47 @@ def register_page(request):
             
             messages.success(request, f'Регистрация прошла успешно! Добро пожаловать, {user.first_name}!')
             return redirect('index')
-        
-        # Если форма невалидна, Django сохранит ошибки в form.errors
-        # и мы вернем форму с ошибками пользователю
-        # НЕТ НЕОБХОДИМОСТИ ВРУЧНУЮ ВЫВОДИТЬ СООБЩЕНИЯ - форма сама покажет ошибки в шаблоне
-    
-    else:  # GET запрос - показываем пустую форму
+    else:
         form = RegisterForm()
     
-    # Рендерим шаблон с формой
     return render(request, 'register.html', {'form': form})
 
 def login_page(request):
-    """Страница входа"""
     if request.method == 'POST':
         phone = request.POST.get('phone', '').strip()
         password = request.POST.get('password', '')
         
         if not phone or not password:
             messages.error(request, 'Введите телефон и пароль.')
-            return render(request, 'login.html')
-        
-        try:
-            # Ищем пользователя
-            user = Users.objects.get(phone=phone)
-            
-            # Проверяем пароль
-            if check_password(password, user.password):
-                # Сохраняем пользователя в сессии
-                request.session['user_id'] = user.id
-                request.session['user'] = {
-                    'id': user.id,
-                    'first_name': user.first_name,
-                    'last_name': user.last_name,
-                    'phone': user.phone,
-                    'email': user.email,
-                    'role': user.role
-                }
-                
-                messages.success(request, f'Добро пожаловать, {user.first_name}!')
-                return redirect('index')
-            else:
-                messages.error(request, 'Неверный пароль.')
-                
-        except Users.DoesNotExist:
-            messages.error(request, 'Пользователь с таким телефоном не найден.')
+        else:
+            try:
+                user = Users.objects.get(phone=phone)
+                if check_password(password, user.password):
+                    request.session['user_id'] = user.id
+                    request.session['user'] = {
+                        'id': user.id,
+                        'first_name': user.first_name,
+                        'last_name': user.last_name,
+                        'phone': user.phone,
+                        'email': user.email,
+                        'role': user.role
+                    }
+                    messages.success(request, f'Добро пожаловать, {user.first_name}!')
+                    return redirect('index')
+                else:
+                    messages.error(request, 'Неверный пароль.')
+            except Users.DoesNotExist:
+                messages.error(request, 'Пользователь с таким телефоном не найден.')
     
     return render(request, 'login.html')
 
 def logout_page(request):
-    """Выход из системы"""
-    if 'user_id' in request.session:
-        del request.session['user_id']
-    if 'user' in request.session:
-        del request.session['user']
-    
+    request.session.flush()
     messages.success(request, 'Вы успешно вышли из системы.')
     return redirect('index')
 
-# ЛИЧНЫЙ КАБИНЕТ
-
+# ЛИЧНЫЙ КАБИНЕТ (ИСПОЛЬЗУЕТ client.html ИЗ СПИСКА)
 def profile_page(request):
-    """Личный кабинет пользователя"""
-    # Проверяем авторизацию
     user_id = request.session.get('user_id')
     if not user_id:
         messages.warning(request, 'Для доступа к личному кабинету необходимо авторизоваться.')
@@ -370,11 +299,8 @@ def profile_page(request):
     
     try:
         user = Users.objects.get(id=user_id)
-        
-        # Получаем все записи пользователя
         appointments = Appointments.objects.filter(client=user).order_by('-date', '-time')
         
-        # Разделяем записи на будущие и прошедшие
         today = date.today()
         now = datetime.now().time()
         
@@ -387,26 +313,24 @@ def profile_page(request):
             else:
                 past_appointments.append(appointment)
         
+        # ВАЖНО: шаблон client.html ожидает переменные:
+        # - user (данные пользователя из сессии)
+        # - future_appointments / past_appointments
+        # - возможно, другие переменные из контекста
         context = {
             'user': request.session.get('user'),
             'future_appointments': future_appointments,
             'past_appointments': past_appointments,
         }
         
-        return render(request, 'profile.html', context)
+        return render(request, 'client.html', context)  # ИЗМЕНЕНО: profile.html → client.html
         
     except Users.DoesNotExist:
-        # Если пользователь не найден, очищаем сессию
-        if 'user_id' in request.session:
-            del request.session['user_id']
-        if 'user' in request.session:
-            del request.session['user']
-        
+        request.session.flush()
         messages.error(request, 'Пользователь не найден.')
         return redirect('login')
 
 def cancel_appointment(request, appointment_id):
-    """Отмена записи"""
     user_id = request.session.get('user_id')
     if not user_id:
         messages.warning(request, 'Для отмены записи необходимо авторизоваться.')
@@ -415,7 +339,6 @@ def cancel_appointment(request, appointment_id):
     try:
         appointment = Appointments.objects.get(id=appointment_id, client_id=user_id)
         
-        # Можно отменять только будущие записи
         today = date.today()
         now = datetime.now().time()
         
@@ -428,8 +351,27 @@ def cancel_appointment(request, appointment_id):
             appointment.save()
             messages.success(request, 'Запись успешно отменена.')
         
-        return redirect('profile')
+        return redirect('profile')  # Перенаправление на маршрут профиля
         
     except Appointments.DoesNotExist:
         messages.error(request, 'Запись не найдена или у вас нет прав для ее отмены.')
         return redirect('profile')
+
+# ДОПОЛНИТЕЛЬНО: Представление для админ-панели (если потребуется)
+def admin_panel(request):
+    """Простая заглушка для админ-панели. Требует доработки и защиты!"""
+    if not request.session.get('user'):
+        messages.warning(request, 'Требуется авторизация.')
+        return redirect('login')
+    
+    # Добавьте проверку роли администратора в продакшене!
+    # if request.session['user'].get('role') != 'admin':
+    #     messages.error(request, 'Доступ запрещен.')
+    #     return redirect('index')
+    
+    # Здесь можно добавить логику загрузки данных для CRM
+    context = {
+        'user': request.session.get('user'),
+        # Добавьте нужные данные для админки
+    }
+    return render(request, 'admin.html', context)

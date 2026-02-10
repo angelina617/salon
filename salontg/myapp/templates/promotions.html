@@ -1,316 +1,261 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Акции и Скидки - Салон красоты TanGel</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/promotions.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600&display=swap" rel="stylesheet">
-</head>
-<body>
-    <header class="header">
-        <nav class="navbar">
-            <div class="container">
-                <a href="index.html" class="logo">
-                    <span class="logo-icon">✨</span>
-                    <span class="logo-text">TanGel</span>
-                    <span class="logo-sub">Beauty Salon</span>
-                </a>
-                
-                <div class="nav-menu">
-                    <a href="index.html" class="nav-link">Главная</a>
-                    <a href="services.html" class="nav-link">Услуги</a>
-                    <a href="masters.html" class="nav-link">Мастера</a>
-                    <a href="promotions.html" class="nav-link active">Акции</a>
-                    <a href="booking.html" class="nav-link">Запись</a>
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title|default:"Акции и Скидки - Салон красоты TanGel" }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'promotions.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="promotions-hero">
+    <h1>{{ hero_title|default:"Специальные предложения" }}</h1>
+    <p>{{ hero_subtitle|default:"Эксклюзивные акции и выгодные скидки только для вас" }}</p>
+    <div class="hero-stats">
+        {% if max_discount %}
+            <span>Скидки до {{ max_discount }}%</span>
+        {% endif %}
+        <span>{{ active_promotions_count }} активных акций</span>
+    </div>
+</div>
+
+<h2>{{ current_title|default:"Текущие акции" }}</h2>
+<p>{{ current_subtitle|default:"Действующие специальные предложения" }}</p>
+
+{% if promotions %}
+    <div class="promotions-grid">
+        {% for promotion in promotions %}
+        <div class="promotion-card {% if not promotion.is_active %}expired{% endif %}">
+            <div class="promotion-badge">
+                {% if promotion.discount_type == 'percentage' %}
+                    -{{ promotion.discount_value }}%
+                {% elif promotion.discount_type == 'fixed' %}
+                    -{{ promotion.discount_value|floatformat:0 }} ₽
+                {% else %}
+                    {{ promotion.title_short }}
+                {% endif %}
+            </div>
+
+            {% if promotion.end_date %}
+                <div class="time-remaining">
+                    {{ promotion.get_time_remaining }}
                 </div>
-                
-                <div class="nav-contacts">
-                    <a href="tel:+79991234567" class="phone">
-                        <i class="fas fa-phone"></i>
-                        +7 (999) 123-45-67
+            {% endif %}
+
+            {% if promotion.tags.all %}
+                <div class="promotion-tags">
+                    {% for tag in promotion.tags.all %}
+                        <span class="tag">{{ tag.name }}</span>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <h3>{{ promotion.title }}</h3>
+            <div class="status">
+                {% if promotion.is_active %}Активна{% else %}Завершена{% endif %}
+            </div>
+
+            <p>{{ promotion.description|truncatechars:150 }}</p>
+
+            <div class="promotion-price">
+                {% if promotion.original_price %}
+                    <del>{{ promotion.original_price|floatformat:0 }} ₽</del>
+                {% endif %}
+                {% if promotion.discounted_price %}
+                    <strong>{{ promotion.discounted_price|floatformat:0 }} ₽</strong>
+                {% elif promotion.discount_value %}
+                    {% if promotion.discount_type == 'percentage' %}
+                        Скидка {{ promotion.discount_value }}%
+                    {% else %}
+                        -{{ promotion.discount_value|floatformat:0 }} ₽
+                    {% endif %}
+                {% endif %}
+                {% if promotion.price_note %}
+                    <small>{{ promotion.price_note }}</small>
+                {% endif %}
+            </div>
+
+            {% if promotion.conditions %}
+                <ul class="conditions">
+                    {% for condition in promotion.conditions_as_list %}
+                        <li>{{ condition }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+
+            {% if promotion.services.all %}
+                <div class="included-services">
+                    <strong>Включённые услуги:</strong>
+                    {% for service in promotion.services.all %}
+                        <span>{{ service.name }}</span>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <div class="promotion-actions">
+                {% if promotion.is_active %}
+                    <a href="{% url 'booking' %}?promotion={{ promotion.id }}" class="btn">
+                        {% if promotion.booking_button_text %}
+                            {{ promotion.booking_button_text }}
+                        {% else %}
+                            Воспользоваться акцией
+                        {% endif %}
                     </a>
-                    <a href="booking.html" class="btn btn-primary">Записаться</a>
-                </div>
-                
-                <button class="menu-toggle">
-                    <i class="fas fa-bars"></i>
-                </button>
+                    <button type="button" class="btn-outline">Подробнее</button>
+                {% else %}
+                    <span class="btn-disabled">Акция завершена</span>
+                {% endif %}
             </div>
-        </nav>
-    </header>
 
-    <!-- Hero Section -->
-    <section class="promotions-hero">
-        <div class="container">
-            <div class="hero-content">
-                <h1>Специальные предложения</h1>
-                <p>Эксклюзивные акции и выгодные скидки только для вас</p>
-                <div class="hero-badge">
-                    <span class="badge-text">Скидки до 50%</span>
-                    <span class="badge-sub">На первую запись</span>
-                </div>
+            <div class="promotion-meta">
+                <span>{{ promotion.used_count|default:0 }} использовано</span>
+                {% if promotion.start_date or promotion.end_date %}
+                    <span>
+                        {% if promotion.start_date %}с {{ promotion.start_date|date:"d.m.Y" }}{% endif %}
+                        {% if promotion.end_date %} до {{ promotion.end_date|date:"d.m.Y" }}{% endif %}
+                    </span>
+                {% endif %}
             </div>
         </div>
-    </section>
+        {% endfor %}
+    </div>
 
-    <!-- Текущие акции -->
-    <section class="current-promotions">
-        <div class="container">
-            <h2 class="section-title">Текущие акции</h2>
-            <p class="section-subtitle">Действующие специальные предложения</p>
-            
-            <div class="promotions-grid">
-                <!-- Акция 1 -->
-                <div class="promotion-card">
-                    <div class="promotion-header">
-                        <div class="promotion-discount">-25%</div>
-                        <div class="promotion-ends">
-                            <i class="fas fa-clock"></i>
-                            Постоянная акция
-                        </div>
-                    </div>
-                    
-                    <div class="promotion-body">
-                        <h3 class="promotion-title">День СПА для двоих</h3>
-                        <p class="promotion-description">
-                            Романтический день релаксации для пары. Массаж, СПА-процедуры и 
-                            расслабляющая атмосфера для вас и вашего партнера.
-                        </p>
-                        
-                        <div class="promotion-details">
-                            <div class="price-block">
-                                <span class="old-price">8 000 ₽</span>
-                                <span class="new-price">6 000 ₽</span>
-                                <span class="per-person">на человека</span>
-                            </div>
-                            
-                            <ul class="promotion-features">
-                                <li><i class="fas fa-check"></i> Ароматический массаж (60 мин)</li>
-                                <li><i class="fas fa-check"></i> СПА-капсула для двоих</li>
-                                <li><i class="fas fa-check"></i> Фруктовая тарелка и напитки</li>
-                            </ul>
-                        </div>
-                        
-                        <div class="promotion-actions">
-                            <a href="booking.html?promotion=spa" class="btn btn-secondary">
-                                Забронировать для двоих
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                <!-- Акция 2 -->
-                <div class="promotion-card">
-                    <div class="promotion-header">
-                        <div class="promotion-discount">-40%</div>
-                        <div class="promotion-ends">
-                            <i class="fas fa-clock"></i>
-                            По будням до 14:00
-                        </div>
-                    </div>
-                    
-                    <div class="promotion-body">
-                        <h3 class="promotion-title">Утренняя красота</h3>
-                        <p class="promotion-description">
-                            Специальные цены на все услуги при записи на утреннее время 
-                            (с 9:00 до 14:00) в будние дни.
-                        </p>
-                        
-                        <div class="promotion-details">
-                            <div class="price-block">
-                                <span class="old-price">Любая услуга</span>
-                                <span class="new-price">-40%</span>
-                            </div>
-                            
-                            <ul class="promotion-features">
-                                <li><i class="fas fa-check"></i> Действует с понедельника по пятницу</li>
-                                <li><i class="fas fa-check"></i> Только до 14:00</li>
-                                <li><i class="fas fa-check"></i> На все услуги салона</li>
-                            </ul>
-                        </div>
-                        
-                        <div class="promotion-actions">
-                            <a href="booking.html?promotion=morning" class="btn btn-secondary">
-                                <i class="fas fa-sun"></i>
-                                Выбрать утренний слот
-                            </a>
-                        </div>
-                    </div>
-                </div>
+    {% if promotions.has_other_pages %}
+    <nav class="pagination">
+        {% if promotions.has_previous %}
+            <a href="?page={{ promotions.previous_page_number }}" class="pagination-link">← Назад</a>
+        {% endif %}
+
+        {% for num in promotions.paginator.page_range %}
+            {% if promotions.number == num %}
+                <span class="current-page">{{ num }}</span>
+            {% elif num > promotions.number|add:'-3' and num < promotions.number|add:'3' %}
+                <a href="?page={{ num }}" class="pagination-link">{{ num }}</a>
+            {% endif %}
+        {% endfor %}
+
+        {% if promotions.has_next %}
+            <a href="?page={{ promotions.next_page_number }}" class="pagination-link">Вперед →</a>
+        {% endif %}
+    </nav>
+    {% endif %}
+
+{% else %}
+    <div class="no-promotions">
+        <h3>Акций пока нет</h3>
+        <p>Скоро появятся новые специальные предложения</p>
+    </div>
+{% endif %}
+
+{% if seasonal_promotions %}
+    <h2>{{ seasonal_title|default:"Сезонные предложения" }}</h2>
+    <p>{{ seasonal_subtitle|default:"Специальные программы к праздникам" }}</p>
+    <div class="seasonal-grid">
+        {% for seasonal in seasonal_promotions %}
+        <div class="seasonal-card">
+            <div class="season">{{ seasonal.season }}</div>
+            <h3>{{ seasonal.title }}</h3>
+            <p>{{ seasonal.short_description|truncatechars:100 }}</p>
+            <div class="price">
+                {% if seasonal.discounted_price %}
+                    {{ seasonal.discounted_price|floatformat:0 }} ₽
+                    {% if seasonal.original_price %}
+                        <br><small>вместо {{ seasonal.original_price|floatformat:0 }} ₽</small>
+                    {% endif %}
+                {% else %}
+                    от {{ seasonal.min_price|floatformat:0 }} ₽
+                {% endif %}
             </div>
+            <a href="{% url 'booking' %}?seasonal={{ seasonal.id }}" class="btn">
+                {{ seasonal.button_text|default:"Забронировать" }}
+            </a>
         </div>
-    </section>
+        {% endfor %}
+    </div>
+{% endif %}
 
-    <!-- Сезонные предложения -->
-    <section class="seasonal-promotions">
-        <div class="container">
-            <h2 class="section-title">Сезонные предложения</h2>
-            <p class="section-subtitle">Специальные программы к праздникам</p>
-            
-            <div class="seasonal-grid">
-                <!-- Новогодняя акция -->
-                <div class="seasonal-card new-year">
-                    <div class="seasonal-content">
-                        <div class="seasonal-badge">НОВОГОДНЯЯ</div>
-                        <h3>Новогоднее преображение</h3>
-                        <p>Подготовка к праздникам: вечерние прически, макияж, уходовые процедуры</p>
-                        <div class="seasonal-price">
-                            <span>от 3 500 ₽</span>
-                            <small>вместо 5 000 ₽</small>
-                        </div>
-                        <a href="booking.html?season=newyear" class="btn btn-light">
-                            <i class="fas fa-tree"></i>
-                            Забронировать
-                        </a>
-                    </div>
-                </div>
+<section class="certificate-section">
+    <h2>Подарочный сертификат</h2>
+    <div class="certificate-card">
+        <h3>Сертификат TanGel</h3>
+        <p>На сумму от {{ min_certificate_value|default:3000 }} до {{ max_certificate_value|default:50000 }} ₽</p>
+        <div class="certificate-price">Итого: 5 000 ₽</div>
+        {% if gift_wrap_included %}
+            <p class="gift-wrap">включая упаковку</p>
+        {% endif %}
+        <button class="btn">Купить сертификат</button>
+    </div>
 
-                <!-- Весенняя акция -->
-                <div class="seasonal-card spring">
-                    <div class="seasonal-content">
-                        <div class="seasonal-badge">ВЕСЕННЯЯ</div>
-                        <h3>Весеннее обновление</h3>
-                        <p>Курс уходовых процедур для сияющей кожи после зимы</p>
-                        <div class="seasonal-price">
-                            <span>от 8 900 ₽</span>
-                            <small>за курс из 5 процедур</small>
-                        </div>
-                        <a href="booking.html?season=spring" class="btn btn-light">
-                            <i class="fas fa-seedling"></i>
-                            Начать курс
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+    <p>{{ certificate_description|default:"Идеальный подарок для близких на любой праздник" }}</p>
 
-    <!-- Подарочные сертификаты -->
-    <section class="gift-certificates">
-        <div class="container">
-            <div class="certificate-wrapper">
-                <div class="certificate-image">
-                    <div class="certificate-design">
-                        <div class="certificate-ribbon">
-                            <i class="fas fa-gift"></i>
-                            Подарочный сертификат
-                        </div>
-                        <div class="certificate-content">
-                            <h3>Сертификат TanGel</h3>
-                            <p>На сумму от 3 000 до 50 000 ₽</p>
-                            <div class="certificate-value">
-                                <input type="number" min="3000" max="50000" step="1000" value="5000" id="certificateValue">
-                                <span class="currency">₽</span>
-                            </div>
-                            <button class="btn btn-primary" id="buyCertificate">
-                                <i class="fas fa-shopping-cart"></i>
-                                Купить сертификат
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="certificate-info">
-                    <h2 class="section-title">Подарочные сертификаты</h2>
-                    <p>Идеальный подарок для близких на любой праздник</p>
-                    
-                    <ul class="certificate-features">
-                        <li><i class="fas fa-check-circle"></i> Действует 12 месяцев</li>
-                        <li><i class="fas fa-check-circle"></i> На любые услуги салона</li>
-                        <li><i class="fas fa-check-circle"></i> Электронный или печатный формат</li>
-                        <li><i class="fas fa-check-circle"></i> Быстрая доставка</li>
-                        <li><i class="fas fa-check-circle"></i> Красивая упаковка в подарок</li>
-                    </ul>
-                    
-                    <div class="certificate-note">
-                        <i class="fas fa-info-circle"></i>
-                        <p>При покупке сертификата от 10 000 ₽ — бесплатная упаковка и открытка с вашим текстом</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+    <ul class="certificate-features">
+        {% for feature in certificate_features %}
+            <li>{{ feature }}</li>
+        {% empty %}
+            <li>Действует 12 месяцев</li>
+            <li>На любые услуги салона</li>
+            <li>Электронный или печатный формат</li>
+            <li>Быстрая доставка</li>
+            <li>Красивая упаковка в подарок</li>
+        {% endfor %}
+    </ul>
 
-    <section class="promotions-cta">
-        <div class="container">
-            <div class="cta-content">
-                <h2>Не упустите выгодные предложения!</h2>
-                <p>Подпишитесь на рассылку и получайте информацию о новых акциях первыми</p>
-                
-                <form class="newsletter-form">
-                    <div class="form-group">
-                        <input type="email" placeholder="Ваш email" required>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-paper-plane"></i>
-                            Подписаться
-                        </button>
-                    </div>
-                    <label class="checkbox">
-                        <input type="checkbox" required>
-                        <span>Согласен на обработку персональных данных</span>
-                    </label>
-                </form>
-                </div>
-            </div>
-        </div>
-    </section>
+    <div class="certificate-rules">
+        <h4>Правила использования:</h4>
+        <ul>
+            {% for rule in certificate_rules %}
+                <li>{{ rule }}</li>
+            {% empty %}
+                <li>Сертификат действует 12 месяцев с даты покупки</li>
+                <li>Не подлежит обмену на денежные средства</li>
+                <li>Возможна доплата при выборе услуг дороже номинала</li>
+                <li>Предварительная запись обязательна</li>
+            {% endfor %}
+        </ul>
+    </div>
 
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-grid">
-                <div class="footer-col">
-                    <div class="logo">
-                        <span class="logo-icon">✨</span>
-                        <span class="logo-text">TanGel</span>
-                    </div>
-                    <p class="footer-description">
-                        Салон красоты премиум-класса в Красноярске. Индивидуальный подход к каждому клиенту.
-                    </p>
-                    <div class="social-links">
-                        <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
-                        <a href="#" class="social-link"><i class="fab fa-vk"></i></a>
-                        <a href="#" class="social-link"><i class="fab fa-telegram"></i></a>
-                        <a href="#" class="social-link"><i class="fab fa-whatsapp"></i></a>
-                    </div>
-                </div>
-                
-                <div class="footer-col">
-                    <h3 class="footer-title">Контакты</h3>
-                    <ul class="footer-list">
-                        <li><i class="fas fa-map-marker-alt"></i> г. Красноярск, ул. Матросова, д. 1</li>
-                        <li><i class="fas fa-phone"></i> +7 (999) 123-45-67</li>
-                        <li><i class="fas fa-envelope"></i> info@tangel-beauty.ru</li>
-                        <li><i class="fas fa-clock"></i> Ежедневно 9:00-21:00</li>
-                    </ul>
-                </div>
-                
-                <div class="footer-col">
-                    <h3 class="footer-title">Акции</h3>
-                    <ul class="footer-list">
-                        <li><a href="#current">Текущие акции</a></li>
-                        <li><a href="#seasonal">Сезонные предложения</a></li>
-                        <li><a href="#certificates">Подарочные сертификаты</a></li>
-                    </ul>
-                </div>
-                
-                <div class="footer-col">
-                    <h3 class="footer-title">Быстрые ссылки</h3>
-                    <ul class="footer-list">
-                        <li><a href="masters.html">Наши мастера</a></li>
-                        <li><a href="services.html">Услуги и цены</a></li>
-                        <li><a href="booking.html">Онлайн запись</a></li>
-                    </ul>
-                </div>
-            </div>
-            
-            <div class="footer-bottom">
-                <p>&copy; 2026 Салон красоты TanGel. Все права защищены.</p>
-                <p>Сайт разработан для практики</p>
-            </div>
-        </div>
-    </footer>
+    {% if certificate_note %}
+        <p class="note">{{ certificate_note }}</p>
+    {% endif %}
+</section>
 
-</body>
-</html>
+<section class="newsletter-cta">
+    <h2>{{ cta_title|default:"Не упустите выгодные предложения!" }}</h2>
+    <p>{{ cta_text|default:"Подпишитесь на рассылку и получайте информацию о новых акциях первыми" }}</p>
+    <form method="post">
+        {% csrf_token %}
+        <label><input type="checkbox" name="newsletters" value="promotions" checked> Акции и скидки</label>
+        <label><input type="checkbox" name="newsletters" value="events"> Мероприятия и мастер-классы</label>
+        <label><input type="checkbox" name="newsletters" value="news"> Новости салона</label>
+        <label>
+            <input type="checkbox" name="consent" required>
+            Согласен на обработку персональных данных
+        </label>
+        <button type="submit" class="btn">Подписаться</button>
+    </form>
+</section>
+
+{% for promotion in promotions %}
+<div id="promo-modal-{{ promotion.id }}" class="modal" hidden>
+    <h3>{{ promotion.title }}</h3>
+    <span class="close">×</span>
+    <p>{{ promotion.description|linebreaks }}</p>
+
+    {% if promotion.full_conditions %}
+        <h4>Условия акции:</h4>
+        <p>{{ promotion.full_conditions|linebreaks }}</p>
+    {% endif %}
+
+    {% if promotion.services.all %}
+        <h4>Включённые услуги:</h4>
+        <ul>
+            {% for service in promotion.services.all %}
+                <li>{{ service.name }} — {{ service.price|floatformat:0 }} ₽</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <a href="{% url 'booking' %}?promotion={{ promotion.id }}" class="btn">Записаться по акции</a>
+</div>
+{% endfor %}
+{% endblock %}

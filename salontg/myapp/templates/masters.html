@@ -1,480 +1,167 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Наши мастера - Салон красоты TanGel</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/masters.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600&display=swap" rel="stylesheet">
-</head>
-<body>
-    <header class="header">
-        <nav class="navbar">
-            <div class="container">
-                <a href="index.html" class="logo">
-                    <span class="logo-icon">✨</span>
-                    <span class="logo-text">TanGel</span>
-                    <span class="logo-sub">Beauty Salon</span>
-                </a>
-                
-                <div class="nav-menu">
-                    <a href="index.html" class="nav-link">Главная</a>
-                    <a href="services.html" class="nav-link">Услуги</a>
-                    <a href="masters.html" class="nav-link active">Мастера</a>
-                    <a href="promotions.html" class="nav-link">Акции</a>
-                    <a href="booking.html" class="nav-link">Запись</a>
-                </div>
-                
-                <div class="nav-contacts">
-                    <a href="tel:+79991234567" class="phone">
-                        <i class="fas fa-phone"></i>
-                        +7 (999) 123-45-67
-                    </a>
-                    <a href="booking.html" class="btn btn-primary">Записаться</a>
-                </div>
-                
-                <button class="menu-toggle">
-                    <i class="fas fa-bars"></i>
-                </button>
-            </div>
-        </nav>
-    </header>
+{% extends 'base.html' %}
+{% load static %}
 
-    <section class="masters-hero">
-        <div class="container">
-            <h1>Наши мастера</h1>
-            <p>Профессионалы с любовью к своему делу и вниманием к каждому клиенту</p>
-        </div>
-    </section>
+{% block title %}{{ page_title|default:"Наши мастера - Салон красоты TanGel" }}{% endblock %}
 
-    <section class="masters-filter">
-        <div class="container">
-            <div class="filter-container">
-                <button class="filter-btn active" data-filter="all">Все мастера</button>
-                <button class="filter-btn" data-filter="massage">Массаж</button>
-                <button class="filter-btn" data-filter="cosmetology">Косметология</button>
-                <button class="filter-btn" data-filter="hair">Волосы</button>
-                <button class="filter-btn" data-filter="nails">Ногти</button>
-               <!--  <button class="filter-btn" data-filter="popular">Популярные</button> -->
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'masters.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="masters-hero">
+    <h1>{{ hero_title|default:"Наши мастера" }}</h1>
+    <p>{{ hero_subtitle|default:"Профессионалы с любовью к своему делу и вниманием к каждому клиенту" }}</p>
+</div>
+
+<!-- Фильтры -->
+<div class="specializations-filter">
+    <button class="filter-btn active">Все мастера</button>
+    {% for specialization in specializations %}
+        <button class="filter-btn" data-spec="{{ specialization.id }}">{{ specialization.name }}</button>
+    {% endfor %}
+    {% if popular_masters %}
+        <button class="filter-btn" data-popular="true">Популярные</button>
+    {% endif %}
+</div>
+
+<!-- Список мастеров -->
+<div class="masters-grid">
+    {% for master in page_obj %}  {# ← ИСПРАВЛЕНО: page_obj вместо masters #}
+    <div class="master-card" 
+         data-specializations="{{ master.specializations.all|join:' ' }}"
+         {% if master.is_popular %}data-popular="true"{% endif %}
+         {% if master.is_new %}data-new="true"{% endif %}>
+        <div class="master-avatar">
+            {% if master.photo %}
+                <img src="{{ master.photo.url }}" alt="{{ master.name }}">
+            {% else %}
+                <div class="avatar-placeholder">👤</div>
+            {% endif %}
+            <div class="badges">
+                {% if master.is_popular %}
+                    <span class="badge popular">Популярный</span>
+                {% endif %}
+                {% if master.is_new %}
+                    <span class="badge new">Новый</span>
+                {% endif %}
             </div>
         </div>
-    </section>
 
-    <section class="masters-list">
-        <div class="container">
-            <div class="masters-grid">
-                <!-- Мастер 1: Массажист -->
-                <div class="master-card" data-category="massage popular">
-                    <div class="master-header">
-                        <div class="master-photo">
-                            <img src="C:\Users\tanya\Desktop\salon\templates\fronted\images\36cf76a4307bee1da68292cd3dcbcf5a.jpg" 
-                                 alt="Анна - массажист"
-                                 onerror="this.src='https://via.placeholder.com/400x400?text=Anna+Massage'">
-                        </div>
-                        <h2 class="master-name">Анна Смирнова</h2>
-                        <p class="master-specialty">Мастер массажа</p>
-                        <span class="master-exp">Опыт: 8 лет</span>
-                    </div>
-                    
-                    <div class="master-info">
-                        <div class="master-rating">
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star-half-alt"></i>
-                            <span>4.8 (124 отзыва)</span>
-                        </div>
-                        
-                        <p class="master-description">
-                            Специалист по медицинскому и расслабляющему массажу. Прошла обучение в Таиланде и Швейцарии. 
-                            Владеет техниками тайского, шведского, лимфодренажного и антицеллюлитного массажа.
-                        </p>
-                        
-                        <div class="master-skills">
-                            <span class="skill-tag">Тайский массаж</span>
-                            <span class="skill-tag">Лимфодренажный</span>
-                            <span class="skill-tag">Антицеллюлитный</span>
-                            <span class="skill-tag">Расслабляющий</span>
-                        </div>
-                        
-                        <div class="master-actions">
-                            <div class="master-price">
-                                1 500 ₽ / час
-                                <span>Первая консультация бесплатно</span>
-                            </div>
-                            
-                            <div>
-                                <a href="booking.html?master=anna" class="btn btn-primary">
-                                    Записаться
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+        <h3>{{ master.name }}</h3>
+        <p class="specializations">
+            {% for spec in master.specializations.all %}
+                {{ spec.name }}{% if not forloop.last %}, {% endif %}
+            {% endfor %}
+        </p>
+        <p class="experience">Опыт: {{ master.experience }} {{ master.experience|pluralize:"год,года,лет" }}</p>
 
-                <!-- Мастер 2: Косметолог -->
-                <div class="master-card" data-category="cosmetology popular">
-                    <div class="master-header">
-                        <div class="master-photo">
-                            <img src="C:\Users\tanya\Desktop\salon\templates\fronted\images\photo_2026-02-06_09-46-10.jpg"
-                                 alt="Мадина - косметолог"
-                                 onerror="this.src='https://via.placeholder.com/400x400?text=Elena+Cosmetologist'">
-                        </div>
-                        <h2 class="master-name">Мадина Махмедова</h2>
-                        <p class="master-specialty">Косметолог</p>
-                        <span class="master-exp">Опыт: 10 лет</span>
-                    </div>
-                    
-                    <div class="master-info">
-                        <div class="master-rating">
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <span>5.0 (89 отзывов)</span>
-                        </div>
-                        
-                        <p class="master-description">
-                            Сертифицированный специалист по аппаратной и инъекционной косметологии. 
-                            Работает с премиальными брендами: L'Oréal, Estée Lauder, La Prairie.
-                        </p>
-                        
-                        <div class="master-skills">
-                            <span class="skill-tag">Чистка лица</span>
-                            <span class="skill-tag">Пилинги</span>
-                            <span class="skill-tag">Уходовые процедуры</span>
-                            <span class="skill-tag">Консультации</span>
-                            <span class="skill-tag">Программы ухода</span>
-                        </div>
-                        
-                        <div class="master-actions">
-                            <div class="master-price">
-                                3 000 ₽ / процедура
-                                <span>Диагностика кожи бесплатно</span>
-                            </div>
-                            
-                            <div>
-                                <a href="booking.html?master=elena" class="btn btn-primary">
-                                    Записаться
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Мастер 3: Стилист по волосам -->
-                <div class="master-card" data-category="hair">
-                    <div class="master-header">
-                        <div class="master-photo">
-                            <img src="C:\Users\tanya\Desktop\salon\templates\fronted\images\19f11734783a015ac433b8862278e3a5.jpg"
-                                 alt="Мария - стилист"
-                                 onerror="this.src='https://via.placeholder.com/400x400?text=Maria+Stylist'">
-                        </div>
-                        <h2 class="master-name">Мария Минаева </h2>
-                        <p class="master-specialty">Топ-стилист</p>
-                        <span class="master-exp">Опыт: 7 лет</span>
-                    </div>
-                    
-                    <div class="master-info">
-                        <div class="master-rating">
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <span>5.0 (156 отзывов)</span>
-                        </div>
-                        
-                        <p class="master-description">
-                            Эксперт по окрашиванию и сложным стрижкам. Участник международных конкурсов парикмахерского искусства.
-                            Создает индивидуальные образы с учетом типа лица и пожеланий клиента.
-                        </p>
-                        
-                        <div class="master-skills">
-                            <span class="skill-tag">Окрашивание</span>
-                            <span class="skill-tag">Стрижки</span>
-                            <span class="skill-tag">Укладки</span>
-                            <span class="skill-tag">Мелирование</span>
-                        </div>
-                        
-                        <div class="master-actions">
-                            <div class="master-price">
-                                2 000 ₽ / стрижка
-                                <span>Консультация бесплатно</span>
-                            </div>
-                            
-                            <div>
-                                <a href="booking.html?master=maria" class="btn btn-primary">
-                                    Записаться
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Мастер 4: Мастер маникюра -->
-                <div class="master-card" data-category="nails popular">
-                    <div class="master-header">
-                        <div class="master-photo">
-                            <img src="C:\Users\tanya\Desktop\salon\templates\fronted\images\photo_2025-10-09_18-16-25.jpg"
-                                 alt="Алена - мастер маникюра"
-                                 onerror="this.src='https://via.placeholder.com/400x400?text=Olga+Nails'">
-                        </div>
-                        <h2 class="master-name">Алена Белик</h2>
-                        <p class="master-specialty">Мастер ногтевого сервиса</p>
-                        <span class="master-exp">Опыт: 5 лет</span>
-                    </div>
-                    
-                    <div class="master-info">
-                        <div class="master-rating">
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <span>5.0 (203 отзыва)</span>
-                        </div>
-                        
-                        <p class="master-description">
-                            Специалист по аппаратному маникюру и сложному дизайну ногтей. 
-                            Работает с гель-лаками премиальных брендов. Создает авторские дизайны любой сложности.
-                        </p>
-                        
-                        <div class="master-skills">
-                            <span class="skill-tag">Аппаратный маникюр</span>
-                            <span class="skill-tag">Дизайн ногтей</span>
-                            <span class="skill-tag">Наращивание</span>
-                            <span class="skill-tag">Педикюр</span>
-                        </div>
-                        
-                        <div class="master-actions">
-                            <div class="master-price">
-                                2 800 ₽ / маникюр
-                            </div>
-                            
-                            <div>
-                                <a href="booking.html?master=olga" class="btn btn-primary">
-                                    Записаться
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Мастер 5: Массажист 2 -->
-                <div class="master-card" data-category="massage">
-                    <div class="master-header">
-                        <div class="master-photo">
-                            <img src="C:\Users\tanya\Desktop\salon\templates\fronted\images\11.jpg"
-                                 alt="Дмитрий - массажист"
-                                 onerror="this.src='https://via.placeholder.com/400x400?text=Dmitry+Massage'">
-                        </div>
-                        <h2 class="master-name">Дмитрий Емельянов</h2>
-                        <p class="master-specialty">Спортивный массажист</p>
-                        <span class="master-exp">Опыт: 6 лет</span>
-                    </div>
-                    
-                    <div class="master-info">
-                        <div class="master-rating">
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star-half-alt"></i>
-                            <span>4.7 (92 отзыва)</span>
-                        </div>
-                        
-                        <p class="master-description">
-                            Специалист по спортивному и лечебному массажу. Работает со спортсменами и людьми с проблемами опорно-двигательного аппарата.
-                            Индивидуальный подход к восстановлению после травм.
-                        </p>
-                        
-                        <div class="master-skills">
-                            <span class="skill-tag">Спортивный массаж</span>
-                            <span class="skill-tag">Восстановительный</span>
-                            <span class="skill-tag">Глубокий тканевый</span>
-                            <span class="skill-tag">Реабилитация</span>
-                        </div>
-                        
-                        <div class="master-actions">
-                            <div class="master-price">
-                                2 300 ₽ / час
-                                <span>Программа из 5 сеансов</span>
-                            </div>
-                            
-                            <div>
-                                <a href="booking.html?master=dmitry" class="btn btn-primary">
-                                    Записаться
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Мастер 6: Косметолог 2 -->
-                <div class="master-card" data-category="cosmetology">
-                    <div class="master-header">
-                        <div class="master-photo">
-                            <img src="C:\Users\tanya\Desktop\salon\templates\fronted\images\1000_F_160821717_XNXWaPwIzOEk9hpb6GFvV7dAEWIk7xAU.jpg"
-                                 alt="Светлана - косметолог"
-                                 onerror="this.src='https://via.placeholder.com/400x400?text=Svetlana+Cosmetologist'">
-                        </div>
-                        <h2 class="master-name">Светлана Лионова</h2>
-                        <p class="master-specialty">Эстетист-косметолог</p>
-                        <span class="master-exp">Опыт: 4 года</span>
-                    </div>
-                    
-                    <div class="master-info">
-                        <div class="master-rating">
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <span>5.0 (67 отзывов)</span>
-                        </div>
-                        
-                        <p class="master-description">
-                            Специалист по уходовым процедурам и anti-age программам. Работает с натуральной косметикой.
-                            Помогает подобрать домашний уход и создать индивидуальную программу заботы о коже.
-                        </p>
-                        
-                        <div class="master-skills">
-                            <span class="skill-tag">Уходовые процедуры</span>
-                            <span class="skill-tag">Anti-age</span>
-                            <span class="skill-tag">Натуральная косметика</span>
-                            <span class="skill-tag">Подбор ухода</span>
-                        </div>
-                        
-                        <div class="master-actions">
-                            <div class="master-price">
-                                1 900 ₽ / процедура
-                            </div>
-                            
-                            <div>
-                                <a href="booking.html?master=svetlana" class="btn btn-primary">
-                                    Записаться
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div class="rating">
+            {% with rating=master.average_rating|default:0 %}
+                {% for i in "12345"|make_list %}
+                    {% if forloop.counter <= rating|floatformat:0 %}
+                        ★
+                    {% elif forloop.counter|add:"-0.5" <= rating %}
+                        ★½
+                    {% else %}
+                        ☆
+                    {% endif %}
+                {% endfor %}
+            {% endwith %}
+            {{ master.average_rating|floatformat:1 }} ({{ master.review_count|default:0 }} отзыв{{ master.review_count|default:0|pluralize:"ов,а" }})
         </div>
-    </section>
 
-    <!-- Статистика -->
-    <section class="masters-stats">
-        <div class="container">
-            <h2 class="section-title">Наши мастера в цифрах</h2>
-            
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-users"></i>
-                    </div>
-                    <div class="stat-number">6</div>
-                    <div class="stat-text">Профессиональных мастеров</div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-award"></i>
-                    </div>
-                    <div class="stat-number">6+</div>
-                    <div class="stat-text">Лет средний опыт работы</div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-star"></i>
-                    </div>
-                    <div class="stat-number">4.8</div>
-                    <div class="stat-text">Средний рейтинг мастеров</div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-graduation-cap"></i>
-                    </div>
-                    <div class="stat-number">24</div>
-                    <div class="stat-text">Сертификата и диплома</div>
-                </div>
-            </div>
+        <p class="description">{{ master.description|truncatechars:200 }}</p>
+
+        <div class="skills">
+            {% for skill in master.skills_as_list|slice:":4" %}
+                <span class="skill-tag">{{ skill }}</span>
+            {% endfor %}
+            {% if master.skills_as_list|length > 4 %}
+                <span class="skill-tag">+{{ master.skills_as_list|length|add:"-4" }}</span>
+            {% endif %}
         </div>
-    </section>
 
-    <section class="booking-cta">
-        <div class="container">
-            <h2>Выберите своего мастера</h2>
-            <p>Запишитесь на консультацию к любому специалисту и получите 10% скидку на первую процедуру</p>
-            <a href="booking.html" class="btn btn-large">
-                <i class="fas fa-calendar-check"></i>
-                Записаться на консультацию
-            </a>
+        <div class="price-info">
+            {% if master.min_price and master.max_price %}
+                {{ master.min_price|floatformat:0 }} – {{ master.max_price|floatformat:0 }} ₽
+            {% else %}
+                {{ master.price|default:"2000" }} ₽ / час
+            {% endif %}
+            {% if master.free_consultation %}
+                <br><small>Консультация бесплатно</small>
+            {% endif %}
         </div>
-    </section>
 
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-grid">
-                <div class="footer-col">
-                    <div class="logo">
-                        <span class="logo-icon">✨</span>
-                        <span class="logo-text">TanGel</span>
-                    </div>
-                    <p class="footer-description">
-                        Салон красоты премиум-класса в Красноярске. Индивидуальный подход к каждому клиенту.
-                    </p>
-                    <div class="social-links">
-                        <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
-                        <a href="#" class="social-link"><i class="fab fa-vk"></i></a>
-                        <a href="#" class="social-link"><i class="fab fa-telegram"></i></a>
-                        <a href="#" class="social-link"><i class="fab fa-whatsapp"></i></a>
-                    </div>
-                </div>
-                
-                <div class="footer-col">
-                    <h3 class="footer-title">Контакты</h3>
-                    <ul class="footer-list">
-                        <li><i class="fas fa-map-marker-alt"></i> г. Красноярск, ул. Матросова, д. 1</li>
-                        <li><i class="fas fa-phone"></i> +7 (999) 123-45-67</li>
-                        <li><i class="fas fa-envelope"></i> info@tangel-beauty.ru</li>
-                        <li><i class="fas fa-clock"></i> Ежедневно 9:00-21:00</li>
-                    </ul>
-                </div>
-                
-                <div class="footer-col">
-                    <h3 class="footer-title">Услуги</h3>
-                    <ul class="footer-list">
-                        <li><a href="services.html#massage">Массаж</a></li>
-                        <li><a href="services.html#coloring">Окрашивание</a></li>
-                        <li><a href="services.html#nails">Маникюр</a></li>
-                        <li><a href="services.html#cosmetology">Косметология</a></li>
-                        <li><a href="services.html">Все услуги →</a></li>
-                    </ul>
-                </div>
-                
-                <div class="footer-col">
-                    <h3 class="footer-title">Быстрые ссылки</h3>
-                    <ul class="footer-list">
-                        <li><a href="masters.html">Наши мастера</a></li>
-                        <li><a href="promotions.html">Акции и скидки</a></li>
-                        <li><a href="booking.html">Онлайн запись</a></li>
-                    </ul>
-                </div>
-            </div>
-            
-            <div class="footer-bottom">
-                <p>&copy; 2026 Салон красоты TanGel. Все права защищены.</p>
-                <p>Сайт разработан для практики</p>
-            </div>
+        <div class="master-actions">
+            <a href="{% url 'booking' %}?master={{ master.id }}" class="btn">Записаться</a>
+            {% if user.is_staff %}
+                <a href="{% url 'admin:myapp_master_change' master.id %}" class="btn-outline">Редактировать</a>
+            {% endif %}
         </div>
-    </footer>
 
-</body>
-</html>
+        <div class="certificates">
+            {{ master.certificates_count }} сертификат{{ master.certificates_count|pluralize:"а,ов" }}
+            {% if master.education %}
+                · {{ master.education|truncatechars:30 }}
+            {% endif %}
+        </div>
+    </div>
+    {% empty %}
+    <div class="no-masters">
+        <h3>Мастера пока не добавлены</h3>
+        <p>Скоро здесь появятся наши специалисты</p>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Пагинация -->
+{% if is_paginated %}
+<nav class="pagination">
+    {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}" class="pagination-link">← Назад</a>
+    {% endif %}
+
+    {% for num in page_obj.paginator.page_range %}
+        {% if page_obj.number == num %}
+            <span class="current-page">{{ num }}</span>
+        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+            <a href="?page={{ num }}" class="pagination-link">{{ num }}</a>
+        {% endif %}
+    {% endfor %}
+
+    {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}" class="pagination-link">Вперед →</a>
+    {% endif %}
+</nav>
+{% endif %}
+
+<!-- Статистика -->
+<section class="masters-stats">
+    <h2>{{ stats_title|default:"Наши мастера в цифрах" }}</h2>
+    <div class="stats-cards">
+        <div class="stat-card">
+            <strong>{{ stats.masters_count|default:page_obj.paginator.count }}</strong>  {# ← ИСПРАВЛЕНО #}
+            <span>Профессиональных мастеров</span>
+        </div>
+        <div class="stat-card">
+            <strong>{{ stats.avg_experience|floatformat:1|default:"6" }}+</strong>
+            <span>Лет средний опыт работы</span>
+        </div>
+        <div class="stat-card">
+            <strong>{{ stats.avg_rating|floatformat:1|default:"4.8" }}</strong>
+            <span>Средний рейтинг мастеров</span>
+        </div>
+        <div class="stat-card">
+            <strong>{{ stats.certificates_total|default:"24" }}</strong>
+            <span>Сертификата и диплома</span>
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="masters-cta">
+    <h2>{{ cta_title|default:"Выберите своего мастера" }}</h2>
+    <p>{{ cta_text|default:"Запишитесь на консультацию к любому специалисту и получите 10% скидку на первую процедуру" }}</p>
+    <a href="{% url 'booking' %}" class="btn">Записаться на консультацию</a>
+</section>
+{% endblock %}

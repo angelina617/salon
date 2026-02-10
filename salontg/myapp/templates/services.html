@@ -1,430 +1,112 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Услуги - Салон красоты TanGel</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/services.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600&display=swap" rel="stylesheet">
-</head>
-<body>
-    <!-- Header -->
-    <header class="header">
-        <nav class="navbar">
-            <div class="container">
-                <a href="index.html" class="logo">
-                    <span class="logo-icon">✨</span>
-                    <span class="logo-text">TanGel</span>
-                    <span class="logo-sub">Beauty Salon</span>
-                </a>
-                
-                <div class="nav-menu">
-                    <a href="index.html" class="nav-link">Главная</a>
-                    <a href="services.html" class="nav-link active">Услуги</a>
-                    <a href="masters.html" class="nav-link">Мастера</a>
-                    <a href="promotions.html" class="nav-link">Акции</a>
-                    <a href="booking.html" class="nav-link">Запись</a>
-                </div>
-                
-                <div class="nav-contacts">
-                    <a href="tel:+79991234567" class="phone">
-                        <i class="fas fa-phone"></i>
-                        +7 (999) 123-45-67
-                    </a>
-                    <a href="booking.html" class="btn btn-primary">Записаться</a>
-                </div>
-                
-                <button class="menu-toggle">
-                    <i class="fas fa-bars"></i>
-                </button>
-            </div>
-        </nav>
-    </header>
+{% extends 'base.html' %}
+{% load static %}
 
-    <section class="services-hero" id="services">
-        <div class="container">
-            <h1>Наши услуги</h1>
-            <p>Полный спектр beauty-услуг от профессионалов с использованием премиальной косметики</p>
+{% block title %}{{ page_title|default:"Услуги - Салон красоты TanGel" }}{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'services.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="services-hero">
+    <h1>{{ hero_title|default:"Наши услуги" }}</h1>
+    <p>{{ hero_subtitle|default:"Полный спектр beauty-услуг от профессионалов" }}</p>
+</div>
+
+<!-- Фильтр по категориям -->
+<div class="category-filter">
+    <a href="{% url 'services' %}" class="filter-btn {% if not selected_category %}active{% endif %}">Все категории</a>
+    {% for category in categories %}
+        <a href="?category={{ category.code }}" class="filter-btn {% if selected_category == category.code %}active{% endif %}">
+            {{ category.name }}
+        </a>
+    {% endfor %}
+</div>
+
+<!-- Поиск -->
+<div class="search-box">
+    <form method="get" action="{% url 'services' %}">
+        <input type="text" name="search" placeholder="Поиск услуг..." value="{{ search_query }}">
+        {% if search_query %}
+            <a href="{% url 'services' %}" class="clear-search">✕</a>
+        {% endif %}
+        <button type="submit">Найти</button>
+    </form>
+</div>
+
+<!-- Список услуг -->
+<div class="services-grid">
+    {% for service in page_obj %}
+    <div class="service-card" id="service-{{ service.id }}">
+        <div class="service-header">
+            <h3>{{ service.name }}</h3>
+            <span class="service-category-badge">
+                {% for code, name in service.CATEGORY_CHOICES %}
+                    {% if code == service.category %}
+                        {{ name }}
+                    {% endif %}
+                {% endfor %}
+            </span>
         </div>
-    </section>
-
-    <!-- Категория 1: Массаж -->
-    <section class="service-category" id="massage">
-        <div class="container">
-            <div class="category-header">
-                <div class="category-icon">
-                    <i class="fas fa-spa"></i>
-                </div>
-                <h2 class="category-title">Массаж</h2>
-            </div>
-            
-            <div class="services-list">
-                <!-- Услуга 1 -->
-                <div class="service-item">
-                    <div class="service-header">
-                        <h3 class="service-name">Расслабляющий массаж</h3>
-                        <div class="service-price">2 500 ₽</div>
-                    </div>
-                    <div class="service-duration">
-                        <i class="fas fa-clock"></i> 1 час
-                    </div>
-                    <p class="service-description">Снятие мышечного напряжения и общего стресса с использованием ароматерапии</p>
-                    <ul class="service-features">
-                        <li>Аромотерапия с эфирными маслами</li>
-                        <li>Работа со всеми группами мышц</li>
-                        <li>Техники шведского массажа</li>
-                        <li>Расслабляющая атмосфера</li>
-                    </ul>
-                    <div class="service-actions">
-                        <a href="booking.html?service=relax_massage" class="btn btn-primary">Записаться</a>
-                    </div>
-                </div>
-                
-                <!-- Услуга 2 -->
-                <div class="service-item">
-                    <div class="service-header">
-                        <h3 class="service-name">Антицеллюлитный массаж</h3>
-                        <div class="service-price">2 800 ₽</div>
-                    </div>
-                    <div class="service-duration">
-                        <i class="fas fa-clock"></i> 1 час 15 мин
-                    </div>
-                    <p class="service-description">Борьба с целлюлитом и улучшение контуров тела</p>
-                    <ul class="service-features">
-                        <li>Лимфодренажный массаж</li>
-                        <li>Вакуумная техника</li>
-                        <li>Антицеллюлитные средства</li>
-                        <li>Обертывание после процедуры</li>
-                    </ul>
-                    <div class="service-actions">
-                        <a href="booking.html?service=anticellulite_massage" class="btn btn-primary">Записаться</a>
-                    </div>
-                </div>
-                
-                <!-- Услуга 3 -->
-                <div class="service-item">
-                    <div class="service-header">
-                        <h3 class="service-name">Лечебный массаж спины</h3>
-                        <div class="service-price">2 200 ₽</div>
-                    </div>
-                    <div class="service-duration">
-                        <i class="fas fa-clock"></i> 45 мин
-                    </div>
-                    <p class="service-description">Устранение болей в спине и шее, улучшение осанки</p>
-                    <ul class="service-features">
-                        <li>Диагностика проблемных зон</li>
-                        <li>Работа с триггерными точками</li>
-                        <li>Снятие мышечных спазмов</li>
-                        <li>Рекомендации по профилактике</li>
-                    </ul>
-                    <div class="service-actions">
-                        <a href="booking.html?service=back_massage" class="btn btn-primary">Записаться</a>
-                    </div>
-                </div>
-            </div>
+        
+        <div class="service-meta">
+            <span class="duration">⏱️ {{ service.duration }} мин</span>
+            <span class="price">💰 {{ service.price|floatformat:0 }} ₽</span>
         </div>
-    </section>
-
-    <!-- Категория 2: Окрашивание -->
-    <section class="service-category category-light" id="coloring">
-        <div class="container">
-            <div class="category-header">
-                <div class="category-icon">
-                    <i class="fas fa-paint-brush"></i>
-                </div>
-                <h2 class="category-title">Окрашивание волос</h2>
-            </div>
-            
-            <div class="services-list">
-                <!-- Услуга 1 -->
-                <div class="service-item">
-                    <div class="service-header">
-                        <h3 class="service-name">Окрашивание в один тон</h3>
-                        <div class="service-price">2 500 ₽</div>
-                    </div>
-                    <div class="service-duration">
-                        <i class="fas fa-clock"></i> 2 часа
-                    </div>
-                    <p class="service-description">Полное окрашивание волос в выбранный цвет премиальной краской</p>
-                    <ul class="service-features">
-                        <li>Консультация колориста</li>
-                        <li>Краска L'Oréal Professionnel</li>
-                        <li>Промежуточный уход Olaplex</li>
-                        <li>Укладка после процедуры</li>
-                    </ul>
-                    <div class="service-actions">
-                        <a href="booking.html?service=coloring" class="btn btn-primary">Записаться</a>
-                    </div>
-                </div>
-                
-                <!-- Услуга 2 -->
-                <div class="service-item">
-                    <div class="service-header">
-                        <h3 class="service-name">Мелирование</h3>
-                        <div class="service-price">3 500 ₽</div>
-                    </div>
-                    <div class="service-duration">
-                        <i class="fas fa-clock"></i> 3 часа
-                    </div>
-                    <p class="service-description">Классическое или сложное мелирование на шапочку или фольгой</p>
-                    <ul class="service-features">
-                        <li>Анализ состояния волос</li>
-                        <li>Осветление выбранных прядей</li>
-                        <li>Тонирование в нужный оттенок</li>
-                        <li>Восстанавливающая маска</li>
-                    </ul>
-                    <div class="service-actions">
-                        <a href="booking.html?service=highlighting" class="btn btn-primary">Записаться</a>
-                    </div>
-                </div>
-                
-                <!-- Услуга 3 -->
-                <div class="service-item">
-                    <div class="service-header">
-                        <h3 class="service-name">AirTouch</h3>
-                        <div class="service-price">4 500 ₽</div>
-                    </div>
-                    <div class="service-duration">
-                        <i class="fas fa-clock"></i> 4 часа
-                    </div>
-                    <p class="service-description">Современная техника окрашивания с максимально естественным результатом</p>
-                    <ul class="service-features">
-                        <li>Техника "воздушного" мелирования</li>
-                        <li>Плавные переходы цвета</li>
-                        <li>Осветление без желтизны</li>
-                        <li>Экспресс-уход Olaplex №2</li>
-                    </ul>
-                    <div class="service-actions">
-                        <a href="booking.html?service=airtouch" class="btn btn-primary">Записаться</a>
-                    </div>
-                </div>
-            </div>
+        
+        <p class="service-description">{{ service.description|truncatechars:150 }}</p>
+        
+        <div class="service-actions">
+            <a href="{% url 'booking' %}?service={{ service.id }}" class="btn">Записаться</a>
+            {% if user.is_staff %}
+                <a href="{% url 'admin:myapp_services_change' service.id %}" class="btn-outline">Редактировать</a>
+            {% endif %}
         </div>
-    </section>
+    </div>
+    {% empty %}
+    <div class="no-services">
+        <h3>Услуги не найдены</h3>
+        <p>Попробуйте изменить фильтры или поиск</p>
+    </div>
+    {% endfor %}
+</div>
 
-    <!-- Категория 3: Маникюр и педикюр -->
-    <section class="service-category" id="nails">
-        <div class="container">
-            <div class="category-header">
-                <div class="category-icon">
-                    <i class="fas fa-hand-sparkles"></i>
-                </div>
-                <h2 class="category-title">Ногтевой сервис</h2>
-            </div>
-            
-            <div class="services-list">
-                <!-- Услуга 1 -->
-                <div class="service-item">
-                    <div class="service-header">
-                        <h3 class="service-name">Классический маникюр</h3>
-                        <div class="service-price">1 200 ₽</div>
-                    </div>
-                    <div class="service-duration">
-                        <i class="fas fa-clock"></i> 1 час
-                    </div>
-                    <p class="service-description">Обрезной маникюр с обработкой кутикулы и приданием формы ногтям</p>
-                    <ul class="service-features">
-                        <li>Дезинфекция и подготовка</li>
-                        <li>Обработка кутикулы</li>
-                        <li>Придание формы ногтям</li>
-                        <li>Полировка и уход</li>
-                    </ul>
-                    <div class="service-actions">
-                        <a href="booking.html?service=manicure" class="btn btn-primary">Записаться</a>
-                    </div>
-                </div>
-                
-                <!-- Услуга 2 -->
-                <div class="service-item">
-                    <div class="service-header">
-                        <h3 class="service-name">Аппаратный маникюр</h3>
-                        <div class="service-price">1 500 ₽</div>
-                    </div>
-                    <div class="service-duration">
-                        <i class="fas fa-clock"></i> 1 час 15 мин
-                    </div>
-                    <p class="service-description">Безболезненная обработка кутикулы и кожи вокруг ногтя с помощью аппарата</p>
-                    <ul class="service-features">
-                        <li>Аппаратная обработка кутикулы</li>
-                        <li>Шлифовка кожи вокруг ногтя</li>
-                        <li>Придание идеальной формы</li>
-                        <li>Увлажнение и питание</li>
-                    </ul>
-                    <div class="service-actions">
-                        <a href="booking.html?service=apparatus_manicure" class="btn btn-primary">Записаться</a>
-                    </div>
-                </div>
-                
-                <!-- Услуга 3 -->
-                <div class="service-item">
-                    <div class="service-header">
-                        <h3 class="service-name">Педикюр</h3>
-                        <div class="service-price">1 800 ₽</div>
-                    </div>
-                    <div class="service-duration">
-                        <i class="fas fa-clock"></i> 1 час 30 мин
-                    </div>
-                    <p class="service-description">Комплексный уход за стопами и ногтями на ногах</p>
-                    <ul class="service-features">
-                        <li>Ванночка для ног</li>
-                        <li>Обработка стоп и ногтей</li>
-                        <li>Удаление натоптышей</li>
-                        <li>Расслабляющий массаж стоп</li>
-                    </ul>
-                    <div class="service-actions">
-                        <a href="booking.html?service=pedicure" class="btn btn-primary">Записаться</a>
-                    </div>
-                </div>
-            </div>
+<!-- Пагинация -->
+{% if page_obj.has_other_pages %}
+<nav class="pagination">
+    {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}" class="pagination-link">← Назад</a>
+    {% endif %}
+
+    {% for num in page_obj.paginator.page_range %}
+        {% if page_obj.number == num %}
+            <span class="current-page">{{ num }}</span>
+        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+            <a href="?page={{ num }}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}" class="pagination-link">{{ num }}</a>
+        {% endif %}
+    {% endfor %}
+
+    {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}" class="pagination-link">Вперед →</a>
+    {% endif %}
+</nav>
+{% endif %}
+
+<!-- Статистика -->
+<section class="services-stats">
+    <div class="stats-cards">
+        <div class="stat-card">
+            <strong>{{ page_obj.paginator.count }}</strong>
+            <span>Всего услуг</span>
         </div>
-    </section>
-
-    <!-- Категория 4: Косметология -->
-    <section class="service-category category-light" id="cosmetology">
-        <div class="container">
-            <div class="category-header">
-                <div class="category-icon">
-                    <i class="fas fa-user-circle"></i>
-                </div>
-                <h2 class="category-title">Косметология</h2>
-            </div>
-            
-            <div class="services-list">
-                <!-- Услуга 1 -->
-                <div class="service-item">
-                    <div class="service-header">
-                        <h3 class="service-name">Чистка лица</h3>
-                        <div class="service-price">2 500 ₽</div>
-                    </div>
-                    <div class="service-duration">
-                        <i class="fas fa-clock"></i> 1 час 30 мин
-                    </div>
-                    <p class="service-description">Комплексная чистка лица: ручная, аппаратная или комбинированная</p>
-                    <ul class="service-features">
-                        <li>Диагностика кожи</li>
-                        <li>Демакияж и очищение</li>
-                        <li>Распаривание и экстракция</li>
-                        <li>Успокаивающая маска</li>
-                    </ul>
-                    <div class="service-actions">
-                        <a href="booking.html?service=facial_cleaning" class="btn btn-primary">Записаться</a>
-                    </div>
-                </div>
-                
-                <!-- Услуга 2 -->
-                <div class="service-item">
-                    <div class="service-header">
-                        <h3 class="service-name">Альгинатная маска</h3>
-                        <div class="service-price">1 800 ₽</div>
-                    </div>
-                    <div class="service-duration">
-                        <i class="fas fa-clock"></i> 45 мин
-                    </div>
-                    <p class="service-description">Лифтинг-эффект, увлажнение и питание кожи с помощью альгинатной маски</p>
-                    <ul class="service-features">
-                        <li>Очищение кожи</li>
-                        <li>Нанесение сыворотки</li>
-                        <li>Альгинатная маска</li>
-                        <li>Завершающий уход</li>
-                    </ul>
-                    <div class="service-actions">
-                        <a href="booking.html?service=alginate_mask" class="btn btn-primary">Записаться</a>
-                    </div>
-                </div>
-                
-                <!-- Услуга 3 -->
-                <div class="service-item">
-                    <div class="service-header">
-                        <h3 class="service-name">Массаж лица</h3>
-                        <div class="service-price">1 500 ₽</div>
-                    </div>
-                    <div class="service-duration">
-                        <i class="fas fa-clock"></i> 1 час
-                    </div>
-                    <p class="service-description">Расслабляющий или лимфодренажный массаж для улучшения тонуса кожи</p>
-                    <ul class="service-features">
-                        <li>Нанесение массажного масла</li>
-                        <li>Классический или лимфодренажный массаж</li>
-                        <li>Работа с мимическими мышцами</li>
-                        <li>Увлажняющий крем</li>
-                    </ul>
-                    <div class="service-actions">
-                        <a href="booking.html?service=facial_massage" class="btn btn-primary">Записаться</a>
-                    </div>
-                </div>
-            </div>
+        <div class="stat-card">
+            <strong>{{ categories|length }}</strong>
+            <span>Категорий</span>
         </div>
-    </section>
-
-    <section class="booking-cta">
-        <div class="container">
-            <h2>Готовы преобразиться?</h2>
-            <p>Запишитесь на любую услугу онлайн и получите скидку 10% на первую запись!</p>
-            <a href="booking.html" class="btn btn-large">
-                <i class="fas fa-calendar-alt"></i>
-                Записаться онлайн
-            </a>
+        <div class="stat-card">
+            <strong>{{ page_obj.paginator.num_pages }}</strong>
+            <span>Страниц</span>
         </div>
-    </section>
-
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-grid">
-                <div class="footer-col">
-                    <div class="logo">
-                        <span class="logo-icon">✨</span>
-                        <span class="logo-text">TanGel</span>
-                    </div>
-                    <p class="footer-description">
-                        Салон красоты премиум-класса в Красноярске. Индивидуальный подход к каждому клиенту.
-                    </p>
-                    <div class="social-links">
-                        <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
-                        <a href="#" class="social-link"><i class="fab fa-vk"></i></a>
-                        <a href="#" class="social-link"><i class="fab fa-telegram"></i></a>
-                        <a href="#" class="social-link"><i class="fab fa-whatsapp"></i></a>
-                    </div>
-                </div>
-                
-                <div class="footer-col">
-                    <h3 class="footer-title">Контакты</h3>
-                    <ul class="footer-list">
-                        <li><i class="fas fa-map-marker-alt"></i> г. Красноярск, ул. Матросова, д. 1</li>
-                        <li><i class="fas fa-phone"></i> +7 (999) 123-45-67</li>
-                        <li><i class="fas fa-envelope"></i> info@tangel-beauty.ru</li>
-                        <li><i class="fas fa-clock"></i> Ежедневно 9:00-21:00</li>
-                    </ul>
-                </div>
-                
-                <div class="footer-col">
-                    <h3 class="footer-title">Услуги</h3>
-                    <ul class="footer-list">
-                        <li><a href="services.html#massage">Массаж</a></li>
-                        <li><a href="services.html#coloring">Окрашивание</a></li>
-                        <li><a href="services.html#nails">Маникюр и педикюр</a></li>
-                        <li><a href="services.html#cosmetology">Косметология</a></li>
-                        <li><a href="services.html">Все услуги →</a></li>
-                    </ul>
-                </div>
-                
-                <div class="footer-col">
-                    <h3 class="footer-title">Быстрые ссылки</h3>
-                    <ul class="footer-list">
-                        <li><a href="masters.html">Наши мастера</a></li>
-                        <li><a href="promotions.html">Акции и скидки</a></li>
-                        <li><a href="booking.html">Онлайн запись</a></li>
-                    </ul>
-                </div>
-            </div>
-            
-            <div class="footer-bottom">
-                <p>&copy; 2026 Салон красоты TanGel. Все права защищены.</p>
-                <p>Сайт разработан для практики</p>
-            </div>
-        </div>
-    </footer>
-
-</body>
-</html>
+    </div>
+</section>
+{% endblock %}
