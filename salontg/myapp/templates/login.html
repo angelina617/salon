@@ -22,7 +22,8 @@
     <form method="post" class="auth-form">
         {% csrf_token %}
         <div class="form-group">
-            <label for="{{ form.username.id_for_label }}">Имя пользователя или email</label>
+            <label for="{{ form.username.id_for_label }}">email</label>
+            <input type="email" name="email">
             {{ form.username }}
         </div>
 

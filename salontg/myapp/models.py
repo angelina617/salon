@@ -35,11 +35,18 @@ class Services(models.Model):
         return self.name
 
 class Masters(models.Model):
+    class Meta:
+        app_label = 'myapp'
     
     user = models.ForeignKey(Users, on_delete=models.CASCADE, verbose_name='Пользователь', related_name='master_profile')
     specialization = models.CharField(max_length=50 , verbose_name='Специализация')
     experience = models.IntegerField(verbose_name='Стаж')
     description = models.TextField(verbose_name='О мастере')
+    photo = models.ImageField(
+        verbose_name='Фотография мастера',
+        upload_to='images/',  # папка для сохранения фотографий
+        null=True,  # разрешаем NULL значения
+    )
 
     def __str__(self):
         return f"{self.user.first_name} {self.user.last_name}"

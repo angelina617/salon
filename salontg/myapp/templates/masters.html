@@ -95,7 +95,7 @@
         <div class="master-actions">
             <a href="{% url 'booking' %}?master={{ master.id }}" class="btn">Записаться</a>
             {% if user.is_staff %}
-                <a href="{% url 'admin:myapp_master_change' master.id %}" class="btn-outline">Редактировать</a>
+                <a href="/admin/myapp/master/{{ master.id }}/change/" class="btn-outline">Редактировать</a>
             {% endif %}
         </div>
 
