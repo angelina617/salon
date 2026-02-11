@@ -10,7 +10,7 @@ class Users(models.Model):
     
     first_name = models.CharField(max_length=50, verbose_name='Имя')
     last_name = models.CharField(max_length=50, verbose_name='Фамилия')
-    phone = models.CharField(max_length=11, verbose_name='Телефон')
+    phone = models.CharField(max_length=15, verbose_name='Телефон')
     email = models.EmailField(verbose_name='Email')
     password = models.CharField(max_length=150, verbose_name='Пароль')
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, verbose_name='Роль')
@@ -70,3 +70,12 @@ class Appointments(models.Model):
 
     def __str__(self):
         return f"{self.client} - {self.service} ({self.date} {self.time})"
+
+class Photo(models.Model):
+    title = models.CharField(max_length=200)
+    image = models.ImageField(upload_to='photos/')
+    description = models.TextField(blank=True)
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return self.title

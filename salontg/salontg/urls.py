@@ -17,6 +17,8 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from myapp import views
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -31,4 +33,10 @@ urlpatterns = [
     path('logout/', views.logout_page, name='logout'),
     path('client/', views.profile_page, name='client'),
     path('profile/cancel-appointment/<int:appointment_id>/', views.cancel_appointment, name='cancel_appointment'),
+
+    path('upload/', views.upload_photo, name='upload_photo'),
+    path('photos/', views.photo_list, name='photo_list'),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

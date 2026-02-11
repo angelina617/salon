@@ -192,7 +192,7 @@ class TestSalonViews(TestCase):
     def test_registration(self):
         # Проверяем валидную регистрацию
         response = self.client.post(reverse('register'), self.valid_registration_data)
-        self.assertRedirects(response, reverse('index'))
+        self.assertRedirects(response, reverse('login'))
         
         # Проверяем, что пользователь создан
         self.assertEqual(Users.objects.count(), 4)  # 3 тестовых + 1 новый
