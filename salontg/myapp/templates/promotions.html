@@ -219,23 +219,9 @@
     {% endif %}
 </section>
 
-<section class="newsletter-cta">
-    <h2>{{ cta_title|default:"Не упустите выгодные предложения!" }}</h2>
-    <p>{{ cta_text|default:"Подпишитесь на рассылку и получайте информацию о новых акциях первыми" }}</p>
-    <form method="post">
-        {% csrf_token %}
-        <label><input type="checkbox" name="newsletters" value="promotions" checked> Акции и скидки</label>
-        <label><input type="checkbox" name="newsletters" value="events"> Мероприятия и мастер-классы</label>
-        <label><input type="checkbox" name="newsletters" value="news"> Новости салона</label>
-        <label>
-            <input type="checkbox" name="consent" required>
-            Согласен на обработку персональных данных
-        </label>
-        <button type="submit" class="btn">Подписаться</button>
-    </form>
-</section>
 
 {% for promotion in promotions %}
+
 <div id="promo-modal-{{ promotion.id }}" class="modal" hidden>
     <h3>{{ promotion.title }}</h3>
     <span class="close">×</span>

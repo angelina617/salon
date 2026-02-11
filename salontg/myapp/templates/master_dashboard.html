@@ -1,0 +1,442 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Личный кабинет мастера - TanGel{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-container {
+        max-width: 1000px;
+        width: 100%;
+        margin: 2rem auto;
+        padding: 0 1.5rem;
+    }
+
+    .dashboard-header {
+        text-align: center;
+        margin-bottom: 2.5rem;
+    }
+
+    .dashboard-header h1 {
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: 0.5rem;
+    }
+
+    .dashboard-header p {
+        color: var(--text-light);
+        font-size: 1.1rem;
+    }
+
+    .tabs {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        border-bottom: 2px solid var(--border);
+        padding-bottom: 0.5rem;
+    }
+
+    .tab-btn {
+        padding: 0.8rem 1.5rem;
+        background: none;
+        border: none;
+        font-size: 1.1rem;
+        font-weight: 500;
+        color: var(--text-light);
+        cursor: pointer;
+        position: relative;
+        transition: color 0.3s;
+    }
+
+    .tab-btn.active {
+        color: var(--accent);
+    }
+
+    .tab-btn.active::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background: var(--accent);
+        border-radius: 2px;
+    }
+
+    .appointments-section {
+        display: none;
+    }
+
+    .appointments-section.active {
+        display: block;
+    }
+
+    .no-appointments {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: var(--text-light);
+        font-size: 1.1rem;
+        background: var(--card);
+        border-radius: 16px;
+        box-shadow: 0 4px 15px var(--shadow);
+    }
+
+    .no-appointments i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        color: var(--border);
+    }
+
+    .appointment-card {
+        background: var(--card);
+        border-radius: 16px;
+        padding: 1.8rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 15px var(--shadow);
+        transition: transform 0.3s, box-shadow 0.3s;
+        border-left: 4px solid var(--accent);
+    }
+
+    .appointment-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px var(--shadow);
+    }
+
+    .appointment-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .appointment-date {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: var(--accent);
+    }
+
+    .appointment-time {
+        font-size: 1.2rem;
+        color: var(--text);
+        font-weight: 600;
+    }
+
+    .status-badge {
+        padding: 0.4rem 1rem;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .status-pending {
+        background: #fff3cd;
+        color: #856404;
+    }
+
+    .status-confirmed {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .status-completed {
+        background: #e2e3e5;
+        color: #383d41;
+    }
+
+    .status-cancelled {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .client-info {
+        margin-bottom: 1rem;
+    }
+
+    .client-info h4 {
+        font-size: 1.1rem;
+        color: var(--text);
+        margin-bottom: 0.3rem;
+    }
+
+    .client-info p {
+        color: var(--text-light);
+        font-size: 0.95rem;
+        margin: 0.2rem 0;
+    }
+
+    .service-info {
+        margin-bottom: 1.2rem;
+        padding: 1rem;
+        background: var(--bg);
+        border-radius: 10px;
+    }
+
+    .service-info h4 {
+        font-size: 1.15rem;
+        color: var(--accent);
+        margin-bottom: 0.5rem;
+    }
+
+    .service-info p {
+        color: var(--text-light);
+        font-size: 0.95rem;
+        margin: 0.2rem 0;
+    }
+
+    .service-price {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: var(--accent);
+        margin-top: 0.5rem;
+    }
+
+    .notes-section {
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border);
+    }
+
+    .notes-section h5 {
+        font-size: 1rem;
+        color: var(--text);
+        margin-bottom: 0.5rem;
+    }
+
+    .notes-section p {
+        color: var(--text-light);
+        font-style: italic;
+        margin: 0;
+    }
+
+    .actions {
+        display: flex;
+        gap: 0.8rem;
+        margin-top: 1.2rem;
+        flex-wrap: wrap;
+    }
+
+    .btn-sm {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+        border-radius: 20px;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        transition: all 0.3s;
+        border: 2px solid;
+    }
+
+    .btn-confirm {
+        background: #28a745;
+        color: white;
+        border-color: #28a745;
+    }
+
+    .btn-confirm:hover {
+        background: #218838;
+        transform: translateY(-1px);
+    }
+
+    .btn-complete {
+        background: #17a2b8;
+        color: white;
+        border-color: #17a2b8;
+    }
+
+    .btn-complete:hover {
+        background: #138496;
+        transform: translateY(-1px);
+    }
+
+    .btn-disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    @media (max-width: 768px) {
+        .dashboard-container {
+            padding: 0 1rem;
+        }
+
+        .dashboard-header h1 {
+            font-size: 1.8rem;
+        }
+
+        .appointment-card {
+            padding: 1.2rem;
+        }
+
+        .appointment-date {
+            font-size: 1.2rem;
+        }
+
+        .appointment-time {
+            font-size: 1rem;
+        }
+
+        .actions {
+            flex-direction: column;
+        }
+
+        .btn-sm {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <h1>Личный кабинет мастера</h1>
+        <p>Добро пожаловать, {{ master.user.first_name }} {{ master.user.last_name }}</p>
+    </div>
+
+    <div class="tabs">
+        <button class="tab-btn active" data-tab="future">Будущие записи</button>
+        <button class="tab-btn" data-tab="past">Прошедшие записи</button>
+    </div>
+
+    <!-- Будущие записи -->
+    <div id="future" class="appointments-section active">
+        {% if future_appointments %}
+            {% for appointment in future_appointments %}
+            <div class="appointment-card">
+                <div class="appointment-header">
+                    <div>
+                        <div class="appointment-date">
+                            {{ appointment.date|date:"d E Y" }}
+                        </div>
+                        <div class="appointment-time">
+                            ⏰ {{ appointment.time|time:"H:i" }}
+                        </div>
+                    </div>
+                    <span class="status-badge status-{{ appointment.status }}">
+                        {% if appointment.status == 'pending' %}Ожидает подтверждения
+                        {% elif appointment.status == 'confirmed' %}Подтверждена
+                        {% elif appointment.status == 'completed' %}Завершена
+                        {% elif appointment.status == 'cancelled' %}Отменена
+                        {% elif appointment.status == 'no_show' %}Не пришёл
+                        {% endif %}
+                    </span>
+                </div>
+
+                <div class="client-info">
+                    <h4>👤 Клиент</h4>
+                    <p><strong>{{ appointment.client.first_name }} {{ appointment.client.last_name }}</strong></p>
+                    <p>📱 {{ appointment.client.phone }}</p>
+                    {% if appointment.client.email %}
+                    <p>✉️ {{ appointment.client.email }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="service-info">
+                    <h4>💅 Услуга</h4>
+                    <p><strong>{{ appointment.service.name }}</strong></p>
+                    <p>⏱️ Длительность: {{ appointment.service.duration }} мин</p>
+                    <p class="service-price">₽ {{ appointment.service.price }}</p>
+                </div>
+
+                {% if appointment.notes %}
+                <div class="notes-section">
+                    <h5>📝 Примечания клиента</h5>
+                    <p>{{ appointment.notes }}</p>
+                </div>
+                {% endif %}
+
+                <div class="actions">
+                    {% if appointment.status == 'pending' %}
+                        <a href="{% url 'master_confirm_appointment' appointment.id %}" class="btn-sm btn-confirm">
+                            ✅ Подтвердить запись
+                        </a>
+                    {% elif appointment.status == 'confirmed' %}
+                        <a href="{% url 'master_complete_appointment' appointment.id %}" class="btn-sm btn-complete">
+                            ✅ Завершить запись
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="no-appointments">
+                <div>📅</div>
+                <p>У вас пока нет будущих записей</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Прошедшие записи -->
+    <div id="past" class="appointments-section">
+        {% if past_appointments %}
+            {% for appointment in past_appointments %}
+            <div class="appointment-card">
+                <div class="appointment-header">
+                    <div>
+                        <div class="appointment-date">
+                            {{ appointment.date|date:"d E Y" }}
+                        </div>
+                        <div class="appointment-time">
+                            ⏰ {{ appointment.time|time:"H:i" }}
+                        </div>
+                    </div>
+                    <span class="status-badge status-{{ appointment.status }}">
+                        {% if appointment.status == 'pending' %}Ожидает подтверждения
+                        {% elif appointment.status == 'confirmed' %}Подтверждена
+                        {% elif appointment.status == 'completed' %}Завершена
+                        {% elif appointment.status == 'cancelled' %}Отменена
+                        {% elif appointment.status == 'no_show' %}Не пришёл
+                        {% endif %}
+                    </span>
+                </div>
+
+                <div class="client-info">
+                    <h4>👤 Клиент</h4>
+                    <p><strong>{{ appointment.client.first_name }} {{ appointment.client.last_name }}</strong></p>
+                    <p>📱 {{ appointment.client.phone }}</p>
+                </div>
+
+                <div class="service-info">
+                    <h4>💅 Услуга</h4>
+                    <p><strong>{{ appointment.service.name }}</strong></p>
+                    <p>⏱️ {{ appointment.service.duration }} мин</p>
+                    <p class="service-price">₽ {{ appointment.service.price }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="no-appointments">
+                <div>📁</div>
+                <p>У вас пока нет прошедших записей</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    // Переключение вкладок
+    document.querySelectorAll('.tab-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            // Убираем активный класс у всех кнопок
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Добавляем активный класс текущей кнопке
+            this.classList.add('active');
+            
+            // Скрываем все секции
+            document.querySelectorAll('.appointments-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Показываем нужную секцию
+            const tabId = this.getAttribute('data-tab');
+            document.getElementById(tabId).classList.add('active');
+        });
+    });
+</script>
+{% endblock %}
