@@ -22,7 +22,8 @@
     <form method="post" class="auth-form">
         {% csrf_token %}
         <div class="form-group">
-            <label for="{{ form.username.id_for_label }}">Имя пользователя или email</label>
+            <label for="{{ form.username.id_for_label }}">email</label>
+            <input type="email" name="email">
             {{ form.username }}
         </div>
 
@@ -41,7 +42,7 @@
     </form>
 
     <div class="auth-links">
-        <a href="{% url 'password_reset' %}">Забыли пароль?</a>
+        <p>Забыли пароль?</p>
     </div>
 
     <div class="auth-footer">

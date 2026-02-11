@@ -12,11 +12,11 @@ class Users(models.Model):
     last_name = models.CharField(max_length=50, verbose_name='Фамилия')
     phone = models.CharField(max_length=11, verbose_name='Телефон')
     email = models.EmailField(verbose_name='Email')
-    password = models.CharField(max_length=50, verbose_name='Пароль')
+    password = models.CharField(max_length=150, verbose_name='Пароль')
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, verbose_name='Роль')
 
     def __str__(self):
-        return f"{self.first_name} {self.last_name} ({self.role})"
+        return f"{self.first_name} {self.last_name} ({self.get_role_display()})"
 
 class Services(models.Model):
     CATEGORY_CHOICES = [
@@ -35,11 +35,18 @@ class Services(models.Model):
         return self.name
 
 class Masters(models.Model):
+    class Meta:
+        app_label = 'myapp'
     
     user = models.ForeignKey(Users, on_delete=models.CASCADE, verbose_name='Пользователь', related_name='master_profile')
     specialization = models.CharField(max_length=50 , verbose_name='Специализация')
     experience = models.IntegerField(verbose_name='Стаж')
     description = models.TextField(verbose_name='О мастере')
+    photo = models.ImageField(
+        verbose_name='Фотография мастера',
+        upload_to='images/',  # папка для сохранения фотографий
+        null=True,  # разрешаем NULL значения
+    )
 
     def __str__(self):
         return f"{self.user.first_name} {self.user.last_name}"
