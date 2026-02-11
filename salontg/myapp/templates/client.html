@@ -3,6 +3,10 @@
 
 {% block title %}Личный кабинет — {{ user.get_full_name|default:user.username }}{% endblock %}
 
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'client.css' %}">
+{% endblock %}
+
 {% block content %}
 <div class="client-profile-header">
     <h1>Личный кабинет</h1>

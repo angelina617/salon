@@ -12,11 +12,11 @@ class Users(models.Model):
     last_name = models.CharField(max_length=50, verbose_name='Фамилия')
     phone = models.CharField(max_length=11, verbose_name='Телефон')
     email = models.EmailField(verbose_name='Email')
-    password = models.CharField(max_length=50, verbose_name='Пароль')
+    password = models.CharField(max_length=150, verbose_name='Пароль')
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, verbose_name='Роль')
 
     def __str__(self):
-        return f"{self.first_name} {self.last_name} ({self.role})"
+        return f"{self.first_name} {self.last_name} ({self.get_role_display()})"
 
 class Services(models.Model):
     CATEGORY_CHOICES = [

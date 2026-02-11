@@ -31,7 +31,7 @@ def services_page(request):
     search_query = request.GET.get('search', '')
     
     # Получаем все услуги из базы данных
-    services_list = Services.objects.all()
+    services_list = Services.objects.all().order_by('id')
     
     # Фильтр по категории (это просто CharField с choices)
     if category_filter:
@@ -251,12 +251,20 @@ def register_page(request):
             
             messages.success(request, f'Регистрация прошла успешно! Добро пожаловать, {user.first_name}!')
             return redirect('index')
+        
+        else:
+            # ← Добавьте эту строку для отладки
+            print("Form errors:", form.errors)
+
+
     else:
         form = RegisterForm()
     
     return render(request, 'register.html', {'form': form})
 
 def login_page(request):
+    form = LoginForm()
+
     if request.method == 'POST':
         phone = request.POST.get('phone', '').strip()
         password = request.POST.get('password', '')
@@ -274,7 +282,8 @@ def login_page(request):
                         'last_name': user.last_name,
                         'phone': user.phone,
                         'email': user.email,
-                        'role': user.role
+                        'role': user.role,
+                        'username': user.phone
                     }
                     messages.success(request, f'Добро пожаловать, {user.first_name}!')
                     return redirect('index')
@@ -283,7 +292,7 @@ def login_page(request):
             except Users.DoesNotExist:
                 messages.error(request, 'Пользователь с таким телефоном не найден.')
     
-    return render(request, 'login.html')
+    return render(request, 'login.html', {'form': form})
 
 def logout_page(request):
     request.session.flush()
@@ -351,7 +360,7 @@ def cancel_appointment(request, appointment_id):
             appointment.save()
             messages.success(request, 'Запись успешно отменена.')
         
-        return redirect('profile')  # Перенаправление на маршрут профиля
+        return redirect('client')  # Перенаправление на маршрут профиля
         
     except Appointments.DoesNotExist:
         messages.error(request, 'Запись не найдена или у вас нет прав для ее отмены.')
@@ -375,3 +384,127 @@ def admin_panel(request):
         # Добавьте нужные данные для админки
     }
     return render(request, 'admin.html', context)
+
+def master_dashboard(request):
+    """Страница мастера - просмотр своих записей"""
+    user_id = request.session.get('user_id')
+    
+    if not user_id:
+        messages.warning(request, 'Для доступа к личному кабинету мастера необходимо авторизоваться.')
+        return redirect('login')
+    
+    try:
+        # Получаем пользователя
+        user = Users.objects.get(id=user_id)
+        
+        # Проверяем, что пользователь - мастер
+        if user.role != 'master':
+            messages.error(request, 'У вас нет доступа к этой странице.')
+            return redirect('index')
+        
+        # Получаем профиль мастера
+        master_profile = Masters.objects.get(user=user)
+        
+        # Получаем все записи к этому мастеру
+        appointments = Appointments.objects.filter(master=master_profile).select_related(
+            'client', 'service'
+        ).order_by('-date', '-time')
+        
+        today = date.today()
+        now = datetime.now().time()
+        
+        # Разделяем на будущие и прошедшие записи
+        future_appointments = []
+        past_appointments = []
+        
+        for appointment in appointments:
+            if appointment.date > today or (appointment.date == today and appointment.time > now):
+                future_appointments.append(appointment)
+            else:
+                past_appointments.append(appointment)
+        
+        context = {
+            'user': request.session.get('user'),
+            'master': master_profile,
+            'future_appointments': future_appointments,
+            'past_appointments': past_appointments,
+            'today': today,
+        }
+        
+        return render(request, 'master_dashboard.html', context)
+        
+    except Users.DoesNotExist:
+        request.session.flush()
+        messages.error(request, 'Пользователь не найден.')
+        return redirect('login')
+    except Masters.DoesNotExist:
+        messages.error(request, 'Профиль мастера не найден.')
+        return redirect('index')
+    
+def master_confirm_appointment(request, appointment_id):
+    """Подтверждение записи мастером"""
+    user_id = request.session.get('user_id')
+    
+    if not user_id:
+        messages.warning(request, 'Необходимо авторизоваться.')
+        return redirect('login')
+    
+    try:
+        user = Users.objects.get(id=user_id)
+        
+        if user.role != 'master':
+            messages.error(request, 'У вас нет прав для выполнения этого действия.')
+            return redirect('index')
+        
+        master_profile = Masters.objects.get(user=user)
+        
+        appointment = Appointments.objects.get(id=appointment_id, master=master_profile)
+        
+        if appointment.status == 'cancelled':
+            messages.error(request, 'Нельзя подтвердить отменённую запись.')
+        elif appointment.status == 'completed':
+            messages.error(request, 'Запись уже завершена.')
+        else:
+            appointment.status = 'confirmed'
+            appointment.save()
+            messages.success(request, 'Запись успешно подтверждена!')
+        
+        return redirect('master_dashboard')
+        
+    except (Users.DoesNotExist, Masters.DoesNotExist, Appointments.DoesNotExist):
+        messages.error(request, 'Запись не найдена.')
+        return redirect('master_dashboard')
+    
+def master_complete_appointment(request, appointment_id):
+    """Завершение записи мастером"""
+    user_id = request.session.get('user_id')
+    
+    if not user_id:
+        messages.warning(request, 'Необходимо авторизоваться.')
+        return redirect('login')
+    
+    try:
+        user = Users.objects.get(id=user_id)
+        
+        if user.role != 'master':
+            messages.error(request, 'У вас нет прав для выполнения этого действия.')
+            return redirect('index')
+        
+        master_profile = Masters.objects.get(user=user)
+        
+        appointment = Appointments.objects.get(id=appointment_id, master=master_profile)
+        
+        if appointment.status == 'cancelled':
+            messages.error(request, 'Нельзя завершить отменённую запись.')
+        elif appointment.status == 'completed':
+            messages.error(request, 'Запись уже завершена.')
+        else:
+            appointment.status = 'completed'
+            appointment.save()
+            messages.success(request, 'Запись успешно завершена!')
+        
+        return redirect('master_dashboard')
+        
+    except (Users.DoesNotExist, Masters.DoesNotExist, Appointments.DoesNotExist):
+        messages.error(request, 'Запись не найдена.')
+        return redirect('master_dashboard')
