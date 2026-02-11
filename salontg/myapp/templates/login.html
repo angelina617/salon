@@ -19,27 +19,31 @@
         <p class="info">Пожалуйста, войдите, чтобы получить доступ к запрошенной странице.</p>
     {% endif %}
 
-    <form method="post" class="auth-form">
-        {% csrf_token %}
-        <div class="form-group">
-            <label for="{{ form.username.id_for_label }}">email</label>
-            <input type="email" name="email">
-            {{ form.username }}
-        </div>
+<form method="post" class="auth-form">
+    {% csrf_token %}
+    
+    <!-- Скрытое поле для перенаправления -->
+    <input type="hidden" name="next" value="{% url 'index' %}">
+    
+    <div class="form-group">
+        <label for="{{ form.username.id_for_label }}">Email</label>
+        <input type="Email" name="Email">
+        {{ form.username }}
+    </div>
 
-        <div class="form-group">
-            <label for="{{ form.password.id_for_label }}">Пароль</label>
-            {{ form.password }}
-        </div>
+    <div class="form-group">
+        <label for="{{ form.password.id_for_label }}">Пароль</label>
+        {{ form.password }}
+    </div>
 
-        <div class="form-check">
-            <label>
-                {{ form.remember_me }} Запомнить меня
-            </label>
-        </div>
+    <div class="form-check">
+        <label>
+            {{ form.remember_me }} Запомнить меня
+        </label>
+    </div>
 
-        <button type="submit" class="btn">Войти</button>
-    </form>
+    <button type="submit" class="btn">Войти</button>
+</form>
 
     <div class="auth-links">
         <p>Забыли пароль?</p>

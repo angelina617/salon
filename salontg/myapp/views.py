@@ -1,11 +1,11 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Users, Services, Masters, Appointments
+from .models import Users, Services, Masters, Appointments, Photo
 from django.core.paginator import Paginator
 from django.db.models import Q
 from datetime import date, datetime
 from django.contrib import messages
 from django.contrib.auth.hashers import make_password, check_password
-from .forms import RegisterForm, LoginForm, BookingForm
+from .forms import RegisterForm, LoginForm, BookingForm, PhotoForm
 
 # Create your views here.
 def index_page(request):
@@ -189,13 +189,22 @@ def booking_page(request):
             error = f"Произошла ошибка: {str(e)}"
     
     services = Services.objects.all()
-    masters = Masters.objects.all()
-    
-    selected_master_id = request.GET.get('master_id')
+
+    # Получаем ID выбранной услуги из GET-параметра
     selected_service_id = request.GET.get('service_id')
-    
+
+    # Фильтруем мастеров по выбранной услуге
+    if selected_service_id:
+        selected_service = Services.objects.filter(id=selected_service_id).first()
+        # Фильтруем мастеров, которые предоставляют эту услугу
+        masters = Masters.objects.filter(services=selected_service_id)
+    else:
+        selected_service = None
+        # Если услуга не выбрана, показываем пустой список мастеров
+        masters = Masters.objects.none()
+
+    selected_master_id = request.GET.get('master_id')
     selected_master = Masters.objects.filter(id=selected_master_id).first() if selected_master_id else None
-    selected_service = Services.objects.filter(id=selected_service_id).first() if selected_service_id else None
     
     busy_times = []
     master_id_for_calendar = request.GET.get('master_for_calendar')
@@ -234,10 +243,7 @@ def register_page(request):
         form = RegisterForm(request.POST)
         
         if form.is_valid():
-            user = form.save(commit=False)
-            user.password = make_password(form.cleaned_data['password'])
-            user.role = 'client'
-            user.save()
+            user = form.save()
             
             request.session['user_id'] = user.id
             request.session['user'] = {
@@ -250,13 +256,8 @@ def register_page(request):
             }
             
             messages.success(request, f'Регистрация прошла успешно! Добро пожаловать, {user.first_name}!')
-            return redirect('index')
+            return redirect('login')  
         
-        else:
-            # ← Добавьте эту строку для отладки
-            print("Form errors:", form.errors)
-
-
     else:
         form = RegisterForm()
     
@@ -311,34 +312,30 @@ def profile_page(request):
         appointments = Appointments.objects.filter(client=user).order_by('-date', '-time')
         
         today = date.today()
-        now = datetime.now().time()
         
         future_appointments = []
         past_appointments = []
         
         for appointment in appointments:
-            if appointment.date > today or (appointment.date == today and appointment.time > now):
+            # Упрощённая логика: будущие = дата >= сегодня
+            if appointment.date >= today:
                 future_appointments.append(appointment)
             else:
                 past_appointments.append(appointment)
         
-        # ВАЖНО: шаблон client.html ожидает переменные:
-        # - user (данные пользователя из сессии)
-        # - future_appointments / past_appointments
-        # - возможно, другие переменные из контекста
         context = {
             'user': request.session.get('user'),
             'future_appointments': future_appointments,
             'past_appointments': past_appointments,
         }
         
-        return render(request, 'client.html', context)  # ИЗМЕНЕНО: profile.html → client.html
+        return render(request, 'client.html', context)
         
     except Users.DoesNotExist:
         request.session.flush()
         messages.error(request, 'Пользователь не найден.')
         return redirect('login')
-
+        
 def cancel_appointment(request, appointment_id):
     user_id = request.session.get('user_id')
     if not user_id:
@@ -508,3 +505,17 @@ def master_complete_appointment(request, appointment_id):
     except (Users.DoesNotExist, Masters.DoesNotExist, Appointments.DoesNotExist):
         messages.error(request, 'Запись не найдена.')
         return redirect('master_dashboard')
+    
+def upload_photo(request):
+    if request.method == 'POST':
+        form = PhotoForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return redirect('photo_list')
+    else:
+        form = PhotoForm()
+    return render(request, 'upload.html', {'form': form})
+
+def photo_list(request):
+    photos = Photo.objects.all()
+    return render(request, 'photo_list.html', {'photos': photos})

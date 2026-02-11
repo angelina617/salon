@@ -37,54 +37,65 @@
 
         <div class="services-list">
             {% for service in services %}
-            <div class="service-option" data-service-id="{{ service.id }}">
+            <a href="?service_id={{ service.id }}" class="service-option {% if selected_service and selected_service.id == service.id %}selected{% endif %}">
                 <h4>{{ service.name }}</h4>
                 <p>{{ service.short_description|default:service.description|truncatechars:50 }}</p>
                 <div class="service-meta">
                     <span>{{ service.duration }} мин</span>
                     <span>{{ service.price|floatformat:0 }} ₽</span>
                 </div>
-            </div>
+            </a>
             {% empty %}
             <p>Услуги временно недоступны</p>
             {% endfor %}
         </div>
+
+        {% if selected_service %}
+        <p><strong>Выбрано:</strong> <span id="selected-service">{{ selected_service.name }}</span></p>
+        {% else %}
         <p><strong>Выбрано:</strong> <span id="selected-service">Не выбрано</span></p>
+        {% endif %}
     </section>
 
     <!-- Шаг 2: Мастер -->
     <section class="booking-step">
         <h3>2. Выберите мастера</h3>
-        <label>
-            <input type="radio" name="master" value="" checked>
-            Любой свободный мастер — мы подберём специалиста под вашу услугу
-        </label>
+    
+        {% if selected_service %}
+            <label>
+                <input type="radio" name="master" value="" checked>
+                Любой свободный мастер — мы подберём специалиста под вашу услугу
+            </label>
 
-        {% for master in masters %}
-        <label class="master-option">
-            <input type="radio" name="master" value="{{ master.id }}">
-            <div class="master-info">
-                <strong>{{ master.name }}</strong>
-                <p>{{ master.get_main_specialization }} · {{ master.experience }} лет опыта</p>
-                <div class="rating">
-                    {% with rating=master.average_rating|default:0 %}
-                        {% for i in "12345"|make_list %}
-                            {% if forloop.counter <= rating|floatformat:0 %}
-                                ★
-                            {% elif forloop.counter|add:"-0.5" <= rating %}
-                                ★½
-                            {% else %}
-                                ☆
-                            {% endif %}
-                        {% endfor %}
-                    {% endwith %}
+            {% for master in masters %}
+            <label class="master-option">
+                <input type="radio" name="master" value="{{ master.id }}">
+                <div class="master-info">
+                    <strong>{{ master.name }}</strong>
+                    <p>{{ master.get_main_specialization }} · {{ master.experience }} лет опыта</p>
+                    <div class="rating">
+                        {% with rating=master.average_rating|default:0 %}
+                            {% for i in "12345"|make_list %}
+                                {% if forloop.counter <= rating|floatformat:0 %}
+                                    ★
+                                {% elif forloop.counter|add:"-0.5" <= rating %}
+                                    ★½
+                                {% else %}
+                                    ☆
+                                {% endif %}
+                            {% endfor %}
+                        {% endwith %}
+                    </div>
                 </div>
-            </div>
-        </label>
-        {% empty %}
-        <p>Мастера временно недоступны</p>
-        {% endfor %}
-        <p><strong>Выбран мастер:</strong> <span id="selected-master">Любой</span></p>
+            </label>
+            {% empty %}
+            <p>К сожалению, нет мастеров, предоставляющих эту услугу. Пожалуйста, выберите другую услугу.</p>
+            {% endfor %}
+        
+            <p><strong>Выбран мастер:</strong> <span id="selected-master">Любой</span></p>
+        {% else %}
+            <p class="info-message">Сначала выберите услугу, чтобы увидеть доступных мастеров</p>
+        {% endif %}
     </section>
 
     <!-- Шаг 3: Дата и время -->

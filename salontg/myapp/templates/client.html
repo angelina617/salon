@@ -1,7 +1,14 @@
 {% extends 'base.html' %}
 {% load static humanize %}
 
-{% block title %}Личный кабинет — {{ user.get_full_name|default:user.username }}{% endblock %}
+{% block title %}
+  Личный кабинет — 
+  {% if user.first_name or user.last_name %}
+    {{ user.first_name }} {{ user.last_name }}
+  {% else %}
+    {{ user.email }}
+  {% endif %}
+{% endblock %}
 
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'client.css' %}">
@@ -11,7 +18,13 @@
 <div class="client-profile-header">
     <h1>Личный кабинет</h1>
     <div class="user-info">
-        <h2>{{ user.get_full_name|default:user.username }}</h2>
+        <h2>
+            {% if user.first_name or user.last_name %}
+                {{ user.first_name }} {{ user.last_name }}
+            {% else %}
+                {{ user.email }}
+            {% endif %}
+        </h2>
         <p>{{ user.email|default:"Без email" }}</p>
         <p>{{ visit_count|default:0 }} посещений</p>
         <p>{{ bonus_points|default:0|intcomma }} бонусов</p>
