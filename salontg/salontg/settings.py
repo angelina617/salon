@@ -80,9 +80,9 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'salon_crasoti',
         'USER': 'postgres',
-        'PASSWORD': '103690',
+        'PASSWORD': 'postgres',
         'HOST': 'localhost', 
-        'PORT': '5432',
+        'PORT': '5433',
         },
     }
 
@@ -123,9 +123,6 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = '/static/'
-STATICFILES_DIRS = (
-    BASE_DIR / 'static',  
-)
-
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+#STATICFILES_DIRS = (
+    #BASE_DIR / 'static',  
+#)
