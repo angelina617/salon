@@ -33,6 +33,7 @@ urlpatterns = [
     path('logout/', views.logout_page, name='logout'),
     path('client/', views.profile_page, name='client'),
     path('profile/cancel-appointment/<int:appointment_id>/', views.cancel_appointment, name='cancel_appointment'),
+    path('master/dashboard/', views.master_dashboard, name='master_dashboard'),
 
     path('upload/', views.upload_photo, name='upload_photo'),
     path('photos/', views.photo_list, name='photo_list'),
