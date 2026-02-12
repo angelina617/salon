@@ -21,16 +21,16 @@
             <a href="{% url 'booking' %}">Запись</a>
             <a href="{% url 'admin:index' %}">Админка</a>
 
-    {% if user %}
-        {% if user.role == 'client' %}
-            <a href="{% url 'client' %}">Кабинет</a>
-        {% elif user.role == 'master' %}
-            <a href="{% url 'master_dashboard' %}">Кабинет</a>
-        {% endif %}
-    <a href="{% url 'logout' %}">Выйти</a>
-    {% else %}
-        <a href="{% url 'login' %}">Войти</a>
+ {% if user.is_authenticated %}
+    {% if user.role == 'client' %}
+        <a href="{% url 'client' %}">Кабинет</a>
+    {% elif user.role == 'master' %}
+        <a href="{% url 'master_dashboard' %}">Кабинет</a>
     {% endif %}
+    <a href="{% url 'logout' %}">Выйти</a>
+{% else %}
+    <a href="{% url 'login' %}">Войти</a>
+{% endif %}
         </nav>
     </header>
 

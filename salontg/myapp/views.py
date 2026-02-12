@@ -437,6 +437,7 @@ def master_dashboard(request):
     except Masters.DoesNotExist:
         messages.error(request, 'Профиль мастера не найден.')
         return redirect('index')
+        
     
 def master_confirm_appointment(request, appointment_id):
     """Подтверждение записи мастером"""
