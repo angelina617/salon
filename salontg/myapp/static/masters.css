@@ -1,5 +1,35 @@
 /* Страница мастеров — masters.css */
 
+/* УБРАТЬ РОЗОВЫЙ ФОН - ГЛОБАЛЬНЫЙ ФИКС */
+* {
+    margin: 0;
+    padding: 0;
+}
+
+html, body, #app, .container, .page-content, main, section {
+    background-color: #ffffff !important;
+    background-image: none !important;
+    background: #ffffff !important;
+}
+
+body {
+    background-color: #ffffff !important;
+    margin: 0;
+    padding: 0;
+    color: #333333;
+}
+
+:root {
+    --primary-main: #e91e63;
+    --primary-light: #f8bbd0;
+    --accent: #2196f3;
+    --accent-dark: #1976d2;
+    --white: #ffffff;
+    --text-primary: #333333;
+    --text-light: #666666;
+    --shadow: rgba(0, 0, 0, 0.1);
+}
+
 .masters-hero {
   background: linear-gradient(135deg, var(--primary-main), #f48fb1);
   color: var(--white);
@@ -93,111 +123,289 @@
 /* Сетка мастеров */
 .masters-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1.8rem;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2rem;
   margin-bottom: 2.5rem;
 }
 
 .master-card {
-  background: var(--white);
+  background: white;
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 4px 12px var(--shadow);
-  transition: transform 0.2s;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s ease;
 }
 
 .master-card:hover {
-  transform: translateY(-5px);
+  transform: translateY(-8px);
 }
 
+/* ФОТО МАСТЕРА - ИСПРАВЛЕНО */
 .master-avatar {
   width: 100%;
-  height: 220px;
-  background: var(--primary-light);
+  height: 350px;
+  min-height: 350px;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+}
+
+.master-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+  transition: transform 0.5s ease;
+}
+
+.master-card:hover .master-avatar img {
+  transform: scale(1.05);
+}
+
+.avatar-placeholder {
+  width: 100%;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 4rem;
-  color: var(--accent);
+  font-size: 5rem;
+  color: white;
+  background: linear-gradient(135deg, #667eea, #764ba2);
 }
 
-.master-info {
-  padding: 1.5rem;
-}
-
-.master-name {
-  font-size: 1.4rem;
-  color: var(--accent);
-  margin-bottom: 0.3rem;
-}
-
-.master-specialty {
-  color: var(--text-primary);
-  font-weight: 500;
-  margin-bottom: 0.5rem;
-}
-
-.rating {
+/* Бейджи поверх фото */
+.badges {
+  position: absolute;
+  top: 15px;
+  left: 15px;
   display: flex;
-  align-items: center;
-  gap: 0.3rem;
-  margin-bottom: 0.8rem;
+  gap: 8px;
+  z-index: 10;
 }
 
-.star {
-  color: #ffc107;
+.badge {
+  padding: 6px 14px;
+  border-radius: 25px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.badge.popular {
+  background: #ff4757;
+  color: white;
+}
+
+.badge.new {
+  background: #2ed573;
+  color: white;
+}
+
+/* ЦВЕТНАЯ ПОДЛОЖКА ДЛЯ ТЕКСТА */
+.master-info {
+  padding: 1.8rem 1.5rem;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+}
+
+.master-info h3 {
+  font-size: 1.6rem;
+  margin: 0 0 0.3rem 0;
+  color: white;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.master-info .specializations {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.95rem;
+  margin-bottom: 0.8rem;
+  font-weight: 500;
+}
+
+.master-info .experience {
+  background: rgba(255, 255, 255, 0.2);
+  display: inline-block;
+  padding: 6px 16px;
+  border-radius: 30px;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+  color: white;
+  font-weight: 500;
+}
+
+/* Рейтинг */
+.master-info .rating {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 8px 16px;
+  border-radius: 30px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.2rem;
+  color: white;
+  font-size: 0.95rem;
+}
+
+.master-info .star {
+  color: #ffd700;
   font-size: 1.1rem;
 }
 
-.experience {
-  font-size: 0.9rem;
-  color: var(--text-light);
-  margin-bottom: 0.8rem;
+/* Описание */
+.master-info .description {
+  background: rgba(255, 255, 255, 0.15);
+  padding: 16px;
+  border-radius: 16px;
+  margin: 1.2rem 0;
+  color: white;
+  line-height: 1.6;
+  font-size: 0.95rem;
+  border-left: 4px solid rgba(255, 255, 255, 0.6);
 }
 
-.master-description {
-  color: var(--text-light);
-  font-size: 0.95rem;
-  line-height: 1.5;
+/* Навыки */
+.master-info .skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin: 1.2rem 0;
+}
+
+.master-info .skill-tag {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 6px 14px;
+  border-radius: 30px;
+  font-size: 0.85rem;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  font-weight: 500;
+}
+
+/* Цена */
+.master-info .price-info {
+  background: rgba(0, 0, 0, 0.25);
+  padding: 14px 16px;
+  border-radius: 16px;
+  margin: 1.2rem 0;
+  color: white;
+  font-size: 1.3rem;
+  font-weight: 700;
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.master-info .price-info small {
+  font-size: 0.85rem;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.9);
+  display: block;
+  margin-top: 5px;
+}
+
+/* Кнопки */
+.master-info .master-actions {
+  display: flex;
+  gap: 1rem;
+  margin: 1.2rem 0;
+}
+
+.master-info .btn {
+  flex: 1;
+  background: white;
+  color: #667eea;
+  padding: 12px;
+  border-radius: 40px;
+  font-weight: 700;
+  text-decoration: none;
+  text-align: center;
+  border: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.master-info .btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  background: #f8f8f8;
+}
+
+.master-info .btn-outline {
+  background: transparent;
+  border: 2px solid white;
+  color: white;
+  padding: 10px 16px;
+  border-radius: 40px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  font-weight: 600;
+  text-align: center;
+}
+
+.master-info .btn-outline:hover {
+  background: white;
+  color: #667eea;
+}
+
+/* Сертификаты */
+.master-info .certificates {
+  background: rgba(255, 255, 255, 0.15);
+  padding: 12px 16px;
+  border-radius: 40px;
+  color: white;
+  font-size: 0.9rem;
+  text-align: center;
+  margin-top: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  font-weight: 500;
+}
+
+/* РАЗНЫЕ ЦВЕТА ДЛЯ КАРТОЧЕК */
+.master-card:nth-child(3n+1) .master-info {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+}
+
+.master-card:nth-child(3n+2) .master-info {
+  background: linear-gradient(135deg, #f093fb, #f5576c);
+}
+
+.master-card:nth-child(3n+3) .master-info {
+  background: linear-gradient(135deg, #4facfe, #00f2fe);
+}
+
+.master-card:nth-child(3n+1) .btn {
+  color: #667eea;
+}
+
+.master-card:nth-child(3n+2) .btn {
+  color: #f5576c;
+}
+
+.master-card:nth-child(3n+3) .btn {
+  color: #4facfe;
+}
+
+/* Пустое состояние */
+.no-masters {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 4rem 2rem;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 4px 12px var(--shadow);
+}
+
+.no-masters h3 {
+  font-size: 1.5rem;
+  color: var(--text-primary);
   margin-bottom: 1rem;
 }
 
-.services-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-  margin-bottom: 1.2rem;
-}
-
-.service-tag {
-  background: var(--primary-light);
-  color: var(--accent);
-  padding: 0.2rem 0.6rem;
-  border-radius: 12px;
-  font-size: 0.85rem;
-}
-
-.actions {
-  display: flex;
-  gap: 0.8rem;
-  flex-wrap: wrap;
-}
-
-.btn-book {
-  flex: 1;
-  padding: 0.5rem;
-  background: var(--accent);
-  color: var(--white);
-  border: none;
-  border-radius: 30px;
-  font-weight: 600;
-  cursor: pointer;
-  text-align: center;
-  transition: background 0.2s;
-}
-
-.btn-book:hover {
-  background: var(--accent-dark);
+.no-masters p {
+  color: var(--text-light);
 }
 
 /* Пагинация */
@@ -205,23 +413,121 @@
   display: flex;
   justify-content: center;
   gap: 0.5rem;
-  margin-top: 2rem;
+  margin: 3rem 0;
 }
 
 .pagination a,
 .pagination span {
   display: inline-block;
-  padding: 0.4rem 0.8rem;
-  border-radius: 8px;
+  padding: 0.6rem 1rem;
+  border-radius: 10px;
   text-decoration: none;
   color: var(--text-primary);
   background: var(--white);
-  box-shadow: 0 2px 6px var(--shadow);
+  box-shadow: 0 2px 8px var(--shadow);
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.pagination a:hover {
+  background: var(--primary-light);
+  transform: translateY(-2px);
 }
 
 .pagination .current {
   background: var(--accent);
   color: var(--white);
+}
+
+/* Статистика */
+.masters-stats {
+  background: white;
+  padding: 3rem 2rem;
+  border-radius: 30px;
+  margin: 3rem 0;
+  box-shadow: 0 10px 30px var(--shadow);
+}
+
+.masters-stats h2 {
+  text-align: center;
+  font-size: 2rem;
+  color: var(--text-primary);
+  margin-bottom: 2rem;
+}
+
+.stats-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 2rem;
+}
+
+.stat-card {
+  text-align: center;
+  padding: 2rem 1.5rem;
+  background: linear-gradient(135deg, #f5f7fa, #e9edf5);
+  border-radius: 20px;
+  transition: transform 0.3s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+}
+
+.stat-card strong {
+  display: block;
+  font-size: 2.5rem;
+  color: var(--accent);
+  margin-bottom: 0.8rem;
+  font-weight: 800;
+}
+
+.stat-card span {
+  color: var(--text-primary);
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+/* CTA секция */
+.masters-cta {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: linear-gradient(135deg, var(--primary-main), #f48fb1);
+  color: white;
+  border-radius: 30px;
+  margin: 3rem 0;
+}
+
+.masters-cta h2 {
+  font-size: 2.2rem;
+  margin-bottom: 1rem;
+}
+
+.masters-cta p {
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+  opacity: 0.95;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.masters-cta .btn {
+  display: inline-block;
+  padding: 1.2rem 3rem;
+  background: white;
+  color: var(--primary-main);
+  text-decoration: none;
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.masters-cta .btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+  background: #f8f8f8;
 }
 
 /* Адаптивность */
@@ -241,10 +547,32 @@
 
   .masters-grid {
     grid-template-columns: 1fr;
+    gap: 1.5rem;
   }
 
-  .btn-book {
-    width: 100%;
+  .master-avatar {
+    height: 300px;
+    min-height: 300px;
+  }
+
+  .master-info {
+    padding: 1.5rem;
+  }
+
+  .master-info h3 {
+    font-size: 1.4rem;
+  }
+
+  .masters-stats h2 {
+    font-size: 1.6rem;
+  }
+
+  .masters-cta h2 {
+    font-size: 1.8rem;
+  }
+
+  .masters-cta p {
+    font-size: 1rem;
   }
 }
 
@@ -254,15 +582,37 @@
   }
 
   .master-avatar {
-    height: 180px;
-    font-size: 3rem;
+    height: 250px;
+    min-height: 250px;
   }
 
-  .master-name {
-    font-size: 1.2rem;
+  .master-info {
+    padding: 1.2rem;
   }
 
-  .actions {
+  .master-info h3 {
+    font-size: 1.3rem;
+  }
+
+  .master-info .master-actions {
     flex-direction: column;
+    gap: 0.8rem;
+  }
+
+  .stat-card {
+    padding: 1.5rem;
+  }
+
+  .stat-card strong {
+    font-size: 2rem;
+  }
+
+  .masters-cta {
+    padding: 3rem 1.5rem;
+  }
+
+  .masters-cta .btn {
+    padding: 1rem 2rem;
+    font-size: 1rem;
   }
 }

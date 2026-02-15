@@ -4,7 +4,7 @@
 {% block title %}{{ page_title|default:"Наши мастера - Салон красоты TanGel" }}{% endblock %}
 
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'masters.css' %}">
+    <link rel="stylesheet" href="{% static 'css/masters.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -14,23 +14,37 @@
 </div>
 
 <!-- Фильтры -->
-<div class="specializations-filter">
-    <button class="filter-btn active">Все мастера</button>
-    {% for specialization in specializations %}
-        <button class="filter-btn" data-spec="{{ specialization.id }}">{{ specialization.name }}</button>
-    {% endfor %}
-    {% if popular_masters %}
-        <button class="filter-btn" data-popular="true">Популярные</button>
-    {% endif %}
+<div class="filters-section">
+    <div class="filters-row">
+        <div class="filter-group">
+            <label for="specialization">Специализация</label>
+            <select id="specialization" class="filter-control">
+                <option value="">Все мастера</option>
+                {% for specialization in specializations %}
+                    <option value="{{ specialization.id }}">{{ specialization.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        {% if popular_masters %}
+        <div class="filter-group">
+            <label for="popular">Популярные</label>
+            <select id="popular" class="filter-control">
+                <option value="">Все</option>
+                <option value="true">Только популярные</option>
+            </select>
+        </div>
+        {% endif %}
+        <div class="filter-actions">
+            <button class="btn-filter btn-apply">Применить</button>
+            <button class="btn-filter btn-reset">Сбросить</button>
+        </div>
+    </div>
 </div>
 
 <!-- Список мастеров -->
 <div class="masters-grid">
-    {% for master in page_obj %}  {# ← ИСПРАВЛЕНО: page_obj вместо masters #}
-    <div class="master-card" 
-         data-specializations="{{ master.specializations.all|join:' ' }}"
-         {% if master.is_popular %}data-popular="true"{% endif %}
-         {% if master.is_new %}data-new="true"{% endif %}>
+    {% for master in page_obj %}
+    <div class="master-card">
         <div class="master-avatar">
             {% if master.photo %}
                 <img src="{{ master.photo.url }}" alt="{{ master.name }}">
@@ -47,63 +61,69 @@
             </div>
         </div>
 
-        <h3>{{ master.name }}</h3>
-        <p class="specializations">
-            {% for spec in master.specializations.all %}
-                {{ spec.name }}{% if not forloop.last %}, {% endif %}
-            {% endfor %}
-        </p>
-        <p class="experience">Опыт: {{ master.experience }} {{ master.experience|pluralize:"год,года,лет" }}</p>
-
-        <div class="rating">
-            {% with rating=master.average_rating|default:0 %}
-                {% for i in "12345"|make_list %}
-                    {% if forloop.counter <= rating|floatformat:0 %}
-                        ★
-                    {% elif forloop.counter|add:"-0.5" <= rating %}
-                        ★½
-                    {% else %}
-                        ☆
-                    {% endif %}
+        <div class="master-info">
+            <h3>{{ master.name }}</h3>
+            <p class="specializations">
+                {% for spec in master.specializations.all %}
+                    {{ spec.name }}{% if not forloop.last %}, {% endif %}
                 {% endfor %}
-            {% endwith %}
-            {{ master.average_rating|floatformat:1 }} ({{ master.review_count|default:0 }} отзыв{{ master.review_count|default:0|pluralize:"ов,а" }})
-        </div>
+            </p>
+            <p class="experience">Опыт: {{ master.experience }} {{ master.experience|pluralize:"год,года,лет" }}</p>
 
-        <p class="description">{{ master.description|truncatechars:200 }}</p>
+            <div class="rating">
+                {% with rating=master.average_rating|default:0 %}
+                    {% for i in "12345"|make_list %}
+                        {% if forloop.counter <= rating|floatformat:0 %}
+                            <span class="star">★</span>
+                        {% elif forloop.counter|add:"-0.5" <= rating %}
+                            <span class="star">★½</span>
+                        {% else %}
+                            <span class="star">☆</span>
+                        {% endif %}
+                    {% endfor %}
+                {% endwith %}
+                <span>{{ master.average_rating|floatformat:1 }} ({{ master.review_count|default:0 }} отзыв{{ master.review_count|default:0|pluralize:"ов,а" }})</span>
+            </div>
 
-        <div class="skills">
-            {% for skill in master.skills_as_list|slice:":4" %}
-                <span class="skill-tag">{{ skill }}</span>
-            {% endfor %}
-            {% if master.skills_as_list|length > 4 %}
-                <span class="skill-tag">+{{ master.skills_as_list|length|add:"-4" }}</span>
+            {% if master.description %}
+            <p class="description">{{ master.description|truncatechars:200 }}</p>
             {% endif %}
-        </div>
 
-        <div class="price-info">
-            {% if master.min_price and master.max_price %}
-                {{ master.min_price|floatformat:0 }} – {{ master.max_price|floatformat:0 }} ₽
-            {% else %}
-                {{ master.price|default:"2000" }} ₽ / час
+            {% if master.skills_as_list %}
+            <div class="skills">
+                {% for skill in master.skills_as_list|slice:":4" %}
+                    <span class="skill-tag">{{ skill }}</span>
+                {% endfor %}
+                {% if master.skills_as_list|length > 4 %}
+                    <span class="skill-tag">+{{ master.skills_as_list|length|add:"-4" }}</span>
+                {% endif %}
+            </div>
             {% endif %}
-            {% if master.free_consultation %}
-                <br><small>Консультация бесплатно</small>
-            {% endif %}
-        </div>
 
-        <div class="master-actions">
-            <a href="{% url 'booking' %}?master={{ master.id }}" class="btn">Записаться</a>
-            {% if user.is_staff %}
-                <a href="/admin/myapp/master/{{ master.id }}/change/" class="btn-outline">Редактировать</a>
-            {% endif %}
-        </div>
+            <div class="price-info">
+                {% if master.min_price and master.max_price %}
+                    {{ master.min_price|floatformat:0 }} – {{ master.max_price|floatformat:0 }} ₽
+                {% else %}
+                    {{ master.price|default:"2000" }} ₽ / час
+                {% endif %}
+                {% if master.free_consultation %}
+                    <small>Консультация бесплатно</small>
+                {% endif %}
+            </div>
 
-        <div class="certificates">
-            {{ master.certificates_count }} сертификат{{ master.certificates_count|pluralize:"а,ов" }}
-            {% if master.education %}
-                · {{ master.education|truncatechars:30 }}
-            {% endif %}
+            <div class="master-actions">
+                <a href="{% url 'booking' %}?master={{ master.id }}" class="btn">Записаться</a>
+                {% if user.is_staff %}
+                    <a href="/admin/myapp/master/{{ master.id }}/change/" class="btn-outline">Редактировать</a>
+                {% endif %}
+            </div>
+
+            <div class="certificates">
+                {{ master.certificates_count|default:"0" }} сертификат{{ master.certificates_count|default:"0"|pluralize:"а,ов" }}
+                {% if master.education %}
+                    · {{ master.education|truncatechars:30 }}
+                {% endif %}
+            </div>
         </div>
     </div>
     {% empty %}
@@ -123,7 +143,7 @@
 
     {% for num in page_obj.paginator.page_range %}
         {% if page_obj.number == num %}
-            <span class="current-page">{{ num }}</span>
+            <span class="current">{{ num }}</span>
         {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
             <a href="?page={{ num }}" class="pagination-link">{{ num }}</a>
         {% endif %}
@@ -140,7 +160,7 @@
     <h2>{{ stats_title|default:"Наши мастера в цифрах" }}</h2>
     <div class="stats-cards">
         <div class="stat-card">
-            <strong>{{ stats.masters_count|default:page_obj.paginator.count }}</strong>  {# ← ИСПРАВЛЕНО #}
+            <strong>{{ stats.masters_count|default:page_obj.paginator.count }}</strong>
             <span>Профессиональных мастеров</span>
         </div>
         <div class="stat-card">
@@ -153,7 +173,7 @@
         </div>
         <div class="stat-card">
             <strong>{{ stats.certificates_total|default:"24" }}</strong>
-            <span>Сертификата и диплома</span>
+            <span>Сертификатов и дипломов</span>
         </div>
     </div>
 </section>

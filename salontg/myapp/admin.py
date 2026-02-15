@@ -35,6 +35,22 @@ class MastersAdmin(admin.ModelAdmin):
 
 @admin.register(Appointments)
 class AppointmentsAdmin(admin.ModelAdmin):
-    list_display = ('client', 'service', 'master', 'date', 'time', 'status')
+    list_display = ('client_info', 'service_info', 'master_info', 'date', 'time', 'status')
     list_filter = ('status', 'date')
     search_fields = ('client__first_name', 'client__last_name', 'master__user__first_name')
+    
+    def client_info(self, obj):
+        if obj.client:
+            return f"{obj.client.first_name} {obj.client.last_name}"
+        return "-"
+    client_info.short_description = 'Клиент'
+    
+    def service_info(self, obj):
+        return obj.service.name if obj.service else "-"
+    service_info.short_description = 'Услуга'
+    
+    def master_info(self, obj):
+        if obj.master and obj.master.user:
+            return obj.master.user.first_name
+        return "-"
+    master_info.short_description = 'Мастер'
