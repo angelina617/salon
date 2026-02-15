@@ -51,21 +51,6 @@
         </p>
         <p class="experience">Опыт: {{ master.experience }} {{ master.experience|pluralize:"год,года,лет" }}</p>
 
-        <div class="rating">
-            {% with rating=master.average_rating|default:0 %}
-                {% for i in "12345"|make_list %}
-                    {% if forloop.counter <= rating|floatformat:0 %}
-                        ★
-                    {% elif forloop.counter|add:"-0.5" <= rating %}
-                        ★½
-                    {% else %}
-                        ☆
-                    {% endif %}
-                {% endfor %}
-            {% endwith %}
-            {{ master.average_rating|floatformat:1 }} ({{ master.review_count|default:0 }} отзыв{{ master.review_count|default:0|pluralize:"ов,а" }})
-        </div>
-
             {% if master.description %}
             <p class="description">{{ master.description|truncatechars:200 }}</p>
             {% endif %}
