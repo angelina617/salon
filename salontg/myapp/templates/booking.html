@@ -23,26 +23,41 @@
 
 <form method="post" id="booking-form">
     {% csrf_token %}
+    
+    <!-- Вывод сообщений об успехе или ошибке -->
+    {% if messages %}
+        <div class="messages-container">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    
+    {% if error %}
+        <div class="alert alert-danger">
+            {{ error }}
+        </div>
+    {% endif %}
+    
+    {% if success_message %}
+        <div class="alert alert-success">
+            {{ success_message }}
+        </div>
+    {% endif %}
 
     <!-- Шаг 1: Услуга -->
     <section class="booking-step">
         <h3>1. Выберите услугу</h3>
-        {% if categories %}
-            <div class="categories">
-                {% for category in categories %}
-                    <button type="button" class="category-btn">{{ category.name }}</button>
-                {% endfor %}
-            </div>
-        {% endif %}
 
         <div class="services-list">
             {% for service in services %}
             <a href="?service_id={{ service.id }}" class="service-option {% if selected_service and selected_service.id == service.id %}selected{% endif %}">
                 <h4>{{ service.name }}</h4>
-                <p>{{ service.short_description|default:service.description|truncatechars:50 }}</p>
                 <div class="service-meta">
-                    <span>{{ service.duration }} мин</span>
-                    <span>{{ service.price|floatformat:0 }} ₽</span>
+                    <span>⏱️ {{ service.duration }} мин</span>
+                    <span>💰 {{ service.price|floatformat:0 }} ₽</span>
                 </div>
             </a>
             {% empty %}
@@ -60,39 +75,32 @@
     <!-- Шаг 2: Мастер -->
     <section class="booking-step">
         <h3>2. Выберите мастера</h3>
-    
+
         {% if selected_service %}
-            <label>
-                <input type="radio" name="master" value="" checked>
-                Любой свободный мастер — мы подберём специалиста под вашу услугу
+            <label class="master-option">
+                <input type="radio" name="master" value="auto" checked>
+                <div class="master-info">
+                    <strong>Автоматический подбор</strong>
+                    <p>Мы подберём свободного мастера с нужной специализацией</p>
+                </div>
             </label>
 
             {% for master in masters %}
             <label class="master-option">
                 <input type="radio" name="master" value="{{ master.id }}">
                 <div class="master-info">
-                    <strong>{{ master.name }}</strong>
-                    <p>{{ master.get_main_specialization }} · {{ master.experience }} лет опыта</p>
-                    <div class="rating">
-                        {% with rating=master.average_rating|default:0 %}
-                            {% for i in "12345"|make_list %}
-                                {% if forloop.counter <= rating|floatformat:0 %}
-                                    ★
-                                {% elif forloop.counter|add:"-0.5" <= rating %}
-                                    ★½
-                                {% else %}
-                                    ☆
-                                {% endif %}
-                            {% endfor %}
-                        {% endwith %}
-                    </div>
+                    <strong>{{ master.user.first_name }} {{ master.user.last_name }}</strong>
+                    <p>{{ master.specialization }} · {{ master.experience }} лет опыта</p>
+                    {% if master.photo %}
+                        <img src="{{ master.photo.url }}" alt="Фото мастера" class="master-photo">
+                    {% endif %}
                 </div>
             </label>
             {% empty %}
-            <p>К сожалению, нет мастеров, предоставляющих эту услугу. Пожалуйста, выберите другую услугу.</p>
+            <p class="info-message">К сожалению, нет мастеров, предоставляющих эту услугу. Пожалуйста, выберите другую услугу.</p>
             {% endfor %}
-        
-            <p><strong>Выбран мастер:</strong> <span id="selected-master">Любой</span></p>
+    
+            <p><strong>Выбран мастер:</strong> <span id="selected-master">Автоматический подбор</span></p>
         {% else %}
             <p class="info-message">Сначала выберите услугу, чтобы увидеть доступных мастеров</p>
         {% endif %}
@@ -101,77 +109,60 @@
     <!-- Шаг 3: Дата и время -->
     <section class="booking-step">
         <h3>3. Выберите дату и время</h3>
+    
         <label>
             Выберите дату:
-            <input type="date" name="date" required>
+            <input type="date" name="date" min="{{ today }}" required>
         </label>
-        <p>* Время указано с учётом выбранной услуги ({{ selected_duration|default:"60" }} мин)</p>
-        <div class="time-slots">
-            <!-- Временные слоты будут подгружаться через JS или сервер -->
-            <button type="button" disabled>Нет доступного времени</button>
-        </div>
+    
+        <label>
+            Выберите время:
+            <select name="time" class="form-control" required>
+                <option value="">Выберите время</option>
+                {% for hour in working_hours %}
+                    <option value="{{ hour }}">{{ hour }}</option>
+                {% endfor %}
+            </select>
+        </label>
+    
+        <p class="info-message">Рабочее время салона: 8:00 - 20:00</p>
+    
+        {% if busy_times %}
+            <p class="warning">Некоторые временные слоты могут быть заняты</p>
+        {% endif %}
+    
         <p><strong>Выбрано время:</strong> <span id="selected-time">Не выбрано</span></p>
     </section>
 
     <!-- Шаг 4: Контактные данные -->
     <section class="booking-step">
         <h3>4. Ваши контактные данные</h3>
-        {% if user.is_authenticated %}
-            <p>Ваши данные заполнены автоматически</p>
-        {% endif %}
+        
         <label>
             Имя и фамилия *
-            <input type="text" name="full_name" value="{{ user.get_full_name }}" required>
+            <input type="text" name="client_name" required>
         </label>
+        
         <label>
             Телефон *
-            <input type="tel" name="phone" value="{{ user.profile.phone|default:'' }}" required>
+            <input type="tel" name="client_phone" required>
         </label>
+        
         <label>
-            Email (для подтверждения) *
-            <input type="email" name="email" value="{{ user.email }}" required>
+            Email *
+            <input type="email" name="client_email" required>
         </label>
+        
         <label>
             Комментарий к записи
-            <textarea name="comment"></textarea>
+            <textarea name="notes"></textarea>
         </label>
     </section>
 
-    <!-- Шаг 5: Дополнительно -->
-    <section class="booking-step">
-        <h3>5. Дополнительные опции</h3>
-        {% if is_first_visit %}
-        <label>
-            <input type="checkbox" name="first_visit_discount">
-            Первый визит — скидка {{ discount_percent|default:10 }}% на первую услугу
-        </label>
-        {% endif %}
-        <label>
-            <input type="checkbox" name="gift_certificate">
-            Оформить как подарок
-        </label>
-        <label>
-            <input type="checkbox" name="newsletter" checked>
-            Получать новости об акциях
-        </label>
-        <label>
-            <input type="checkbox" name="reminders" checked>
-            SMS и email-напоминания
-        </label>
-    </section>
-
-    <!-- Итог -->
-    <section class="booking-summary">
-        <h3>Итого:</h3>
-        <p>Услуга: <span id="summary-service">Не выбрана</span></p>
-        <p>Мастер: <span id="summary-master">Любой</span></p>
-        <p>Дата и время: <span id="summary-datetime">Не выбрано</span></p>
-        <p>Стоимость: <span id="summary-price">0</span> ₽</p>
-        {% if discount_percent %}
-        <p>Скидка ({{ discount_percent }}%): <span id="summary-discount">-0</span> ₽</p>
-        <p><strong>Итого к оплате: <span id="summary-total">0</span> ₽</strong></p>
-        {% endif %}
-    </section>
+    <!-- Скрытые поля для услуги и мастера -->
+    {% if selected_service %}
+    <input type="hidden" name="service" value="{{ selected_service.id }}">
+    {% endif %}
 
     <!-- Согласия -->
     <div class="consent-section">
@@ -183,8 +174,6 @@
     </div>
 
     <div class="form-actions">
-        <button type="button" class="btn-outline">Назад</button>
-        <button type="button" class="btn-outline">Далее</button>
         <button type="submit" class="btn">Отправить заявку на запись</button>
     </div>
 </form>
@@ -196,12 +185,6 @@
 <!-- Преимущества -->
 <h2>{{ benefits_title|default:"Почему стоит записываться онлайн?" }}</h2>
 <div class="benefits-grid">
-    {% for benefit in benefits %}
-    <div class="benefit-card">
-        <h4>{{ benefit.title }}</h4>
-        <p>{{ benefit.description }}</p>
-    </div>
-    {% empty %}
     <div class="benefit-card">
         <h4>Круглосуточная запись</h4>
         <p>Записывайтесь в любое время, даже ночью</p>
@@ -214,6 +197,38 @@
         <h4>Напоминания</h4>
         <p>СМС и email-напоминания о визите</p>
     </div>
-    {% endfor %}
 </div>
+
+<!-- Стили для сообщений -->
+<style>
+    .messages-container {
+        margin-bottom: 20px;
+    }
+
+    .alert {
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 15px;
+        border: 1px solid transparent;
+        font-size: 16px;
+    }
+
+    .alert-success {
+        background-color: #d4edda;
+        color: #155724;
+        border-color: #c3e6cb;
+    }
+
+    .alert-danger {
+        background-color: #f8d7da;
+        color: #721c24;
+        border-color: #f5c6cb;
+    }
+
+    .alert-info {
+        background-color: #d1ecf1;
+        color: #0c5460;
+        border-color: #bee5eb;
+    }
+</style>
 {% endblock %}

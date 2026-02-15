@@ -68,9 +68,6 @@ def services_page(request):
     
     return render(request, 'services.html', context)
 
-# УДАЛЕНО: service_detail_page (нет соответствующего шаблона в списке)
-# Ссылки на детали услуги должны вести на services_page с фильтром или обрабатываться через JS
-
 def masters_page(request):
     specialization_filter = request.GET.get('specialization', '')
     search_query = request.GET.get('search', '')
@@ -101,9 +98,6 @@ def masters_page(request):
     }
     
     return render(request, 'masters.html', context)
-
-# УДАЛЕНО: master_detail_page (нет соответствующего шаблона в списке)
-# Детали мастера должны отображаться через модальные окна на masters_page или services_page
 
 def promotions_page(request):
     promotions = [
@@ -146,7 +140,16 @@ def booking_page(request):
         
         try:
             service = Services.objects.get(id=service_id)
-            master = Masters.objects.get(id=master_id)
+            
+            # Если мастер не выбран - подбираем автоматически
+            if master_id == 'auto' or not master_id:
+                available_masters = Masters.objects.filter(services=service_id).order_by('experience')
+                if available_masters.exists():
+                    master = available_masters.first()
+                else:
+                    raise Exception("Нет доступных мастеров для этой услуги")
+            else:
+                master = Masters.objects.get(id=master_id)
             
             is_time_available = not Appointments.objects.filter(
                 master=master,
@@ -157,6 +160,7 @@ def booking_page(request):
             
             if not is_time_available:
                 error = "Выбранное время уже занято. Пожалуйста, выберите другое время."
+                messages.error(request, error)
             else:
                 user, created = Users.objects.get_or_create(
                     phone=client_phone,
@@ -179,33 +183,42 @@ def booking_page(request):
                     status='pending'
                 )
                 
-                success_message = f"Запись успешно создана! Номер записи: {appointment.id}. Мы свяжемся с вами для подтверждения."
+                success_message = f"✅ Заявка на запись успешно отправлена! Номер записи: {appointment.id}. Мы свяжемся с вами для подтверждения."
+                messages.success(request, success_message)
+                
+                # Очищаем форму после успешной отправки
+                return redirect('booking')
                 
         except Services.DoesNotExist:
             error = "Выбранная услуга не найдена."
+            messages.error(request, error)
         except Masters.DoesNotExist:
             error = "Выбранный мастер не найден."
+            messages.error(request, error)
         except Exception as e:
             error = f"Произошла ошибка: {str(e)}"
+            messages.error(request, error)
     
     services = Services.objects.all()
 
-    # Получаем ID выбранной услуги из GET-параметра
+    # Получаем выбранную услугу
     selected_service_id = request.GET.get('service_id')
+    selected_service = None
+    masters = Masters.objects.none()  # Пустой кверисет по умолчанию
 
-    # Фильтруем мастеров по выбранной услуге
     if selected_service_id:
         selected_service = Services.objects.filter(id=selected_service_id).first()
-        # Фильтруем мастеров, которые предоставляют эту услугу
-        masters = Masters.objects.filter(services=selected_service_id)
-    else:
-        selected_service = None
-        # Если услуга не выбрана, показываем пустой список мастеров
-        masters = Masters.objects.none()
-
+        if selected_service:
+            # Фильтруем мастеров, которые предоставляют эту услугу
+            masters = Masters.objects.filter(services=selected_service_id)
+    
     selected_master_id = request.GET.get('master_id')
     selected_master = Masters.objects.filter(id=selected_master_id).first() if selected_master_id else None
     
+    # Рабочее время: 8:00 - 20:00
+    working_hours = [f"{hour:02d}:00" for hour in range(8, 20)]
+    
+    # Занятое время для выбранного мастера и даты
     busy_times = []
     master_id_for_calendar = request.GET.get('master_for_calendar')
     date_for_calendar = request.GET.get('date_for_calendar')
@@ -217,7 +230,7 @@ def booking_page(request):
             status__in=['confirmed', 'pending']
         ).values_list('time', flat=True))
     
-    # Передаем user в контекст для отображения в шапке (если авторизован)
+    # Передаем пользователя в контекст для отображения в шапке (если авторизован)
     current_user = request.session.get('user')
     
     context = {
@@ -225,18 +238,15 @@ def booking_page(request):
         'masters': masters,
         'selected_master': selected_master,
         'selected_service': selected_service,
+        'working_hours': working_hours,
+        'busy_times': busy_times,
         'error': error,
         'success_message': success_message,
-        'busy_times': busy_times,
         'today': date.today().isoformat(),
-        'user': current_user,  # Для отображения статуса авторизации в шапке
+        'user': current_user,
     }
     
     return render(request, 'booking.html', context)
-
-# РЕГИСТРАЦИЯ И АВТОРИЗАЦИЯ
-# Шаблоны register.html и login.html должны существовать в проекте (не входят в основной список,
-# но критичны для работы). Если их нет - создайте на базе base.html
 
 def register_page(request):
     if request.method == 'POST':
