@@ -22,7 +22,6 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('/', admin.site.urls),
     path('', views.index_page, name='index'),
     path('services/', views.services_page, name='services'),
     path('masters/', views.masters_page, name='masters'),
@@ -34,7 +33,8 @@ urlpatterns = [
     path('client/', views.profile_page, name='client'),
     path('profile/cancel-appointment/<int:appointment_id>/', views.cancel_appointment, name='cancel_appointment'),
     path('master/dashboard/', views.master_dashboard, name='master_dashboard'),
-
+    path('master/confirm/<int:appointment_id>/', views.master_confirm_appointment, name='master_confirm_appointment'),
+    path('master/complete/<int:appointment_id>/', views.master_complete_appointment, name='master_complete_appointment'),
     path('upload/', views.upload_photo, name='upload_photo'),
     path('photos/', views.photo_list, name='photo_list'),
 ]

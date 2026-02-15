@@ -18,18 +18,29 @@
             <a href="{% url 'services' %}">Услуги</a>
             <a href="{% url 'masters' %}">Мастера</a>
             <a href="{% url 'booking' %}">Запись</a>
-            <a href="{% url 'admin:index' %}">Админка</a>
-
- {% if user.is_authenticated %}
-    {% if user.role == 'client' %}
-        <a href="{% url 'client' %}">Кабинет</a>
-    {% elif user.role == 'master' %}
-        <a href="{% url 'master_dashboard' %}">Кабинет</a>
-    {% endif %}
-    <a href="{% url 'logout' %}">Выйти</a>
-{% else %}
-    <a href="{% url 'login' %}">Войти</a>
-{% endif %}
+    
+            <!-- Личный кабинет для клиента -->
+            {% if user and user.role == 'client' %}
+                <a href="{% url 'client' %}">Личный кабинет</a>
+            {% endif %}
+    
+            <!-- Личный кабинет для мастера -->
+            {% if user and user.role == 'master' %}
+                <a href="{% url 'master_dashboard' %}">Личный кабинет</a>
+            {% endif %}
+    
+            <!-- Админка только для администраторов -->
+            {% if user and user.role == 'admin' %}
+                <a href="{% url 'admin:index' %}">Админка</a>
+            {% endif %}
+    
+            <!-- Кнопки входа/выхода -->
+            {% if user %}
+                <a href="{% url 'logout' %}">Выйти</a>
+            {% else %}
+                <a href="{% url 'login' %}">Войти</a>
+                <a href="{% url 'register' %}">Регистрация</a>
+            {% endif %}
         </nav>
     </header>
 

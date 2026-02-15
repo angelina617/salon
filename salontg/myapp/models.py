@@ -7,7 +7,7 @@ class Users(models.Model):
         ('master', 'Мастер'),
         ('admin', 'Администратор'),
     ]
-    
+
     first_name = models.CharField(max_length=50, verbose_name='Имя')
     last_name = models.CharField(max_length=50, verbose_name='Фамилия')
     phone = models.CharField(max_length=15, verbose_name='Телефон')
@@ -40,6 +40,7 @@ class Masters(models.Model):
     
     user = models.ForeignKey(Users, on_delete=models.CASCADE, verbose_name='Пользователь', related_name='master_profile')
     specialization = models.CharField(max_length=50 , verbose_name='Специализация')
+    services = models.ManyToManyField(Services, verbose_name='Услуги', related_name='masters')
     experience = models.IntegerField(verbose_name='Стаж')
     description = models.TextField(verbose_name='О мастере')
     photo = models.ImageField(
@@ -60,7 +61,7 @@ class Appointments(models.Model):
         ('no_show', 'Не пришёл'),
     ]
 
-    client = models.ForeignKey(Users, on_delete=models.CASCADE, verbose_name='Клиент', related_name='appointments')
+    user = models.ForeignKey(Users, on_delete=models.CASCADE, verbose_name='Клиент', related_name='appointments')
     master = models.ForeignKey(Masters, on_delete=models.CASCADE, verbose_name='Мастер', related_name='appointments')  
     service = models.ForeignKey(Services, on_delete=models.CASCADE, verbose_name='Услуга', related_name='appointments')    
     date = models.DateField(verbose_name='Дата')
@@ -69,7 +70,7 @@ class Appointments(models.Model):
     notes = models.TextField(verbose_name='Примечания', blank=True)
 
     def __str__(self):
-        return f"{self.client} - {self.service} ({self.date} {self.time})"
+        return f"{self.user} - {self.service} ({self.date} {self.time})"
 
 class Photo(models.Model):
     title = models.CharField(max_length=200)
