@@ -25,6 +25,8 @@ class ServicesAdmin(admin.ModelAdmin):
 
 @admin.register(Masters)
 class MastersAdmin(admin.ModelAdmin):
+    list_display = ('get_full_name', 'specialization', 'experience', )
+    search_fields = ('user__first_name', 'user__last_name', 'specialization', 'services')
     list_display = ('get_full_name', 'specialization', 'experience')
     search_fields = ('user__first_name', 'user__last_name', 'specialization')
     filter_horizontal = ['services']  # ← Удобный выбор услуг
