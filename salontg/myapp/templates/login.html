@@ -26,9 +26,9 @@
     <input type="hidden" name="next" value="{% url 'index' %}">
     
     <div class="form-group">
-        <label for="{{ form.username.id_for_label }}">Email</label>
+        <label for="{{ form.phone.id_for_label }}">Телефон</label>
         <input type="Email" name="Email">
-        {{ form.username }}
+        {{ form.phone }}
     </div>
 
     <div class="form-group">
@@ -36,18 +36,8 @@
         {{ form.password }}
     </div>
 
-    <div class="form-check">
-        <label>
-            {{ form.remember_me }} Запомнить меня
-        </label>
-    </div>
-
     <button type="submit" class="btn">Войти</button>
 </form>
-
-    <div class="auth-links">
-        <p>Забыли пароль?</p>
-    </div>
 
     <div class="auth-footer">
         <p>Нет аккаунта? <a href="{% url 'register' %}">Зарегистрироваться</a></p>

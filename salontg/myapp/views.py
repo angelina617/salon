@@ -146,7 +146,7 @@ def booking_page(request):
         
         try:
             service = Services.objects.get(id=service_id)
-            master = Masters.objects.get(id=master_id)
+            masters = Masters.objects.get(id=master_id)
             
             is_time_available = not Appointments.objects.filter(
                 master=master,
@@ -267,24 +267,24 @@ def login_page(request):
     form = LoginForm()
 
     if request.method == 'POST':
-        phone = request.POST.get('phone', '').strip()
+        phone = request.POST.get('username', '').strip()
         password = request.POST.get('password', '')
         
         if not phone or not password:
-            messages.error(request, 'Введите телефон и пароль.')
+            messages.error(request, 'Введите Email и пароль.')
         else:
             try:
-                user = Users.objects.get(phone=phone)
+                user = Users.objects.get(username=username)
                 if check_password(password, user.password):
                     request.session['user_id'] = user.id
                     request.session['user'] = {
                         'id': user.id,
                         'first_name': user.first_name,
                         'last_name': user.last_name,
-                        'phone': user.phone,
+                        'username': user.username,
                         'email': user.email,
                         'role': user.role,
-                        'username': user.phone
+                        'username': user.username
                     }
                     messages.success(request, f'Добро пожаловать, {user.first_name}!')
                     return redirect('index')

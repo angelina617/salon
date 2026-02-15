@@ -106,12 +106,6 @@
             <input type="date" name="date" required>
         </label>
         <p>* Время указано с учётом выбранной услуги ({{ selected_duration|default:"60" }} мин)</p>
-        <div class="time-slots">
-            <!-- Временные слоты будут подгружаться через JS или сервер -->
-            <button type="button" disabled>Нет доступного времени</button>
-        </div>
-        <p><strong>Выбрано время:</strong> <span id="selected-time">Не выбрано</span></p>
-    </section>
 
     <!-- Шаг 4: Контактные данные -->
     <section class="booking-step">
@@ -134,29 +128,6 @@
         <label>
             Комментарий к записи
             <textarea name="comment"></textarea>
-        </label>
-    </section>
-
-    <!-- Шаг 5: Дополнительно -->
-    <section class="booking-step">
-        <h3>5. Дополнительные опции</h3>
-        {% if is_first_visit %}
-        <label>
-            <input type="checkbox" name="first_visit_discount">
-            Первый визит — скидка {{ discount_percent|default:10 }}% на первую услугу
-        </label>
-        {% endif %}
-        <label>
-            <input type="checkbox" name="gift_certificate">
-            Оформить как подарок
-        </label>
-        <label>
-            <input type="checkbox" name="newsletter" checked>
-            Получать новости об акциях
-        </label>
-        <label>
-            <input type="checkbox" name="reminders" checked>
-            SMS и email-напоминания
         </label>
     </section>
 
@@ -183,8 +154,6 @@
     </div>
 
     <div class="form-actions">
-        <button type="button" class="btn-outline">Назад</button>
-        <button type="button" class="btn-outline">Далее</button>
         <button type="submit" class="btn">Отправить заявку на запись</button>
     </div>
 </form>

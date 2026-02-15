@@ -16,8 +16,8 @@ class ServicesAdmin(admin.ModelAdmin):
 
 @admin.register(Masters)
 class MastersAdmin(admin.ModelAdmin):
-    list_display = ('get_full_name', 'specialization', 'experience')
-    search_fields = ('user__first_name', 'user__last_name', 'specialization')
+    list_display = ('get_full_name', 'specialization', 'experience', )
+    search_fields = ('user__first_name', 'user__last_name', 'specialization', 'services')
     
     def get_full_name(self, obj):
         return f"{obj.user.first_name} {obj.user.last_name}"

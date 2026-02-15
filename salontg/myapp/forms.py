@@ -98,20 +98,14 @@ class RegisterForm(forms.ModelForm):
         return user
 
 class LoginForm(forms.Form):
-    phone = forms.CharField(
+    username = forms.CharField(
         widget=forms.TextInput(attrs={
             'class': 'form-control',
-            'placeholder': '+79991234567',
-            'autocomplete': 'tel'
+            'placeholder': 'Ваш логин'
         }),
-        label='Телефон',
-        validators=[
-            RegexValidator(
-                regex=r'^\+?7\d{10}$',
-                message="Номер телефона должен быть в формате: +79991234567"
-            )
-        ]
+        label='Логин'
     )
+
     password = forms.CharField(
         widget=forms.PasswordInput(attrs={
             'class': 'form-control',
@@ -121,11 +115,11 @@ class LoginForm(forms.Form):
         label='Пароль'
     )
     
-    def clean_phone(self):
-        phone = self.cleaned_data.get('phone')
-        if not Users.objects.filter(phone=phone).exists():
-            raise forms.ValidationError("Пользователь с таким телефоном не найден")
-        return phone
+    def clean_username(self):
+        username = self.cleaned_data.get('username')
+        if not Users.objects.filter(username=username).exists():
+            raise forms.ValidationError("Пользователь с таким логином не найден")
+        return username
 
 
 class BookingForm(forms.Form):

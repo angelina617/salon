@@ -54,7 +54,7 @@
     <div class="booking-card">
         <div class="booking-date">{{ booking.datetime|date:"d E, H:i" }}</div>
         <div class="booking-service">{{ booking.service.name }}</div>
-        <div class="booking-master">Мастер: {{ booking.master.name|default:"Любой" }}</div>
+        <div class="booking-masters">Мастер: {{ booking.master.name|default:"Любой" }}</div>
         <div class="booking-duration">{{ booking.service.duration }} минут</div>
         <div class="booking-price">{{ booking.service.price|floatformat:0 }} ₽</div>
         <div class="booking-actions">
