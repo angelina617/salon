@@ -47,7 +47,7 @@
     <div class="master-card">
         <div class="master-avatar">
             {% if master.photo %}
-                <img src="{{ master.photo.url }}" alt="{{ master.name }}">
+                <img src="{{ master.photo.url }}" alt="{{ master.name }}" class="master-avatar-img">
             {% else %}
                 <div class="avatar-placeholder">👤</div>
             {% endif %}
